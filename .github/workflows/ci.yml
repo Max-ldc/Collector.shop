@@ -1,4 +1,4 @@
-name: CI
+name: CI/CD Pipeline
 
 on:
   push:
@@ -7,34 +7,99 @@ on:
     branches: [ "main" ]
 
 jobs:
-  build-backend:
+  audit:
+    name: Audit Dependencies
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./apps/backend
     steps:
-    - uses: actions/checkout@v4
-    - name: Use Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '20'
-        cache: 'npm'
-        cache-dependency-path: apps/backend/package-lock.json
-    - run: npm ci
-    - run: npm run build
+      - uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: '**/package-lock.json'
+      
+      - name: Audit Backend
+        run: |
+          cd apps/backend
+          npm install
+          npm audit --audit-level=critical || true 
+          # Note: '|| true' prevents pipeline failure for demo. Remove to enforce strict security.
 
-  build-frontend:
+      - name: Audit Frontend
+        run: |
+          cd apps/frontend
+          npm install
+          npm audit --audit-level=critical || true
+
+  build-test:
+    name: Build & Test
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./apps/frontend
     steps:
-    - uses: actions/checkout@v4
-    - name: Use Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '20'
-        cache: 'npm'
-        cache-dependency-path: apps/frontend/package-lock.json
-    - run: npm install
-    - run: npm run build
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          # Cache lock files from both apps
+          cache-dependency-path: |
+            apps/backend/package-lock.json
+            apps/frontend/package-lock.json
+
+      - name: Install & Test Backend
+        run: |
+          cd apps/backend
+          npm ci
+          npm run test:cov
+          npm run build
+
+      - name: Install & Test Frontend
+        run: |
+          cd apps/frontend
+          npm ci
+          npm run test
+          npm run build
+      
+      # Upload coverage for SonarCloud
+      - name: Upload Backend Coverage
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-coverage
+          path: apps/backend/coverage/lcov.info
+          retention-days: 1
+
+  sonar-scan:
+    name: SonarQube Scan
+    runs-on: ubuntu-latest
+    needs: build-test
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+      
+      - name: Download Backend Coverage
+        uses: actions/download-artifact@v4
+        with:
+          name: backend-coverage
+          path: apps/backend/coverage
+
+      - name: SonarCloud Scan
+        # Pinning to a specific SHA (v5.0.0) for security compliance
+        uses: SonarSource/sonarcloud-github-action@ffc3010689be73b8e5ae0c57ce35968afd7909e8 # v5.0.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+  docker-build:
+    name: Docker Build Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Build Backend Image
+        run: docker build -t collector-backend ./apps/backend
+
+      - name: Build Frontend Image
+        run: docker build -t collector-frontend ./apps/frontend
