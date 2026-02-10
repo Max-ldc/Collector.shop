@@ -20,19 +20,16 @@ jobs:
           cache-dependency-path: '**/package-lock.json'
       
       - name: Audit Backend
-        shell: bash
         run: |
           cd apps/backend
           npm install
-          npm audit --audit-level=critical || true 
-          # Note: '|| true' prevents pipeline failure for demo. Remove to enforce strict security.
+          cmd /c "npm audit --audit-level=critical || exit 0"
 
       - name: Audit Frontend
-        shell: bash
         run: |
           cd apps/frontend
           npm install
-          npm audit --audit-level=critical || true
+          cmd /c "npm audit --audit-level=critical || exit 0"
 
   build-test:
     name: Build & Test
@@ -51,7 +48,6 @@ jobs:
             apps/frontend/package-lock.json
 
       - name: Install & Test Backend
-        shell: bash
         run: |
           cd apps/backend
           npm ci
@@ -59,7 +55,6 @@ jobs:
           npm run build
 
       - name: Install & Test Frontend
-        shell: bash
         run: |
           cd apps/frontend
           npm ci
