@@ -20,6 +20,7 @@ jobs:
           cache-dependency-path: '**/package-lock.json'
       
       - name: Audit Backend
+        shell: bash
         run: |
           cd apps/backend
           npm install
@@ -27,6 +28,7 @@ jobs:
           # Note: '|| true' prevents pipeline failure for demo. Remove to enforce strict security.
 
       - name: Audit Frontend
+        shell: bash
         run: |
           cd apps/frontend
           npm install
@@ -49,6 +51,7 @@ jobs:
             apps/frontend/package-lock.json
 
       - name: Install & Test Backend
+        shell: bash
         run: |
           cd apps/backend
           npm ci
@@ -56,6 +59,7 @@ jobs:
           npm run build
 
       - name: Install & Test Frontend
+        shell: bash
         run: |
           cd apps/frontend
           npm ci
