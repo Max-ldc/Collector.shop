@@ -86,7 +86,12 @@ jobs:
           path: apps/backend/coverage
 
       - name: SonarCloud Scan
+<<<<<<< HEAD
         uses: SonarSource/sonarcloud-github-action@master
+=======
+        # Pinning to a specific SHA (v5.0.0) for security compliance
+        uses: SonarSource/sonarcloud-github-action@ffc3010689be73b8e5ae0c57ce35968afd7909e8 # v5.0.0
+>>>>>>> 5472eea (ci: set sonarqube & complete CI)
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
