@@ -85,8 +85,8 @@ jobs:
           path: apps/backend/coverage
 
       - name: SonarCloud Scan
-        # Pinning to a specific SHA (v5.0.0) for security compliance
-        uses: SonarSource/sonarcloud-github-action@ffc3010689be73b8e5ae0c57ce35968afd7909e8 # v5.0.0
+        # Using the official sonarqube-scan-action (v4.2.1) which runs without Docker/WSL requirement
+        uses: SonarSource/sonarqube-scan-action@bfd4e558cda28cda6b5defafb9232d191be8c203 # v4.2.1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
