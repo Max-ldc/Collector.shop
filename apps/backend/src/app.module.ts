@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { KeycloakConnectModule, AuthGuard, RoleGuard, ResourceGuard, TokenValidation } from 'nest-keycloak-connect';
+import { KeycloakConnectModule, AuthGuard, RoleGuard, TokenValidation } from 'nest-keycloak-connect';
 import { APP_GUARD } from '@nestjs/core';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -11,7 +11,7 @@ import { ArticlesModule } from './articles/articles.module';
     TypeOrmModule.forRoot({
       type: 'postgres',
       host: process.env.DATABASE_HOST || 'localhost',
-      port: parseInt(process.env.DATABASE_PORT || '5432', 10),
+      port: Number.parseInt(process.env.DATABASE_PORT || '5432', 10),
       username: process.env.DATABASE_USER || 'collector',
       password: process.env.DATABASE_PASSWORD || 'collector',
       database: process.env.DATABASE_NAME || 'collector_db',
