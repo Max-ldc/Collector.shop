@@ -19,7 +19,7 @@ import { ArticlesModule } from './articles/articles.module';
       synchronize: true, // Note: Set to false in production
     }),
     KeycloakConnectModule.register({
-      authServerUrl: process.env.KEYCLOAK_URL || 'http://keycloak:8080',
+      authServerUrl: process.env.KEYCLOAK_URL,
       realm: process.env.KEYCLOAK_REALM || 'collector-realm',
       clientId: process.env.KEYCLOAK_CLIENT_ID || 'backend-client',
       secret: process.env.KEYCLOAK_SECRET || 'secret',
