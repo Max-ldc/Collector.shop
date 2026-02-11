@@ -67,14 +67,14 @@ jobs:
       - name: Install & Test Backend
         run: |
           cd apps/backend
-          npm ci --ignore-scripts
+          npm ci
           npm run test:cov
           npm run build
 
       - name: Install & Test Frontend
         run: |
           cd apps/frontend
-          npm ci --ignore-scripts
+          npm ci
           npm run test
           npm run build
       
@@ -84,6 +84,7 @@ jobs:
         with:
           name: backend-coverage
           path: apps/backend/coverage/lcov.info
+          if-no-files-found: error
           retention-days: 1
 
   sonar-scan:
