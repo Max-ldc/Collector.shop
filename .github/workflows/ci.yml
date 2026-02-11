@@ -6,6 +6,23 @@ on:
   pull_request:
     branches: [ "main" ]
 
+env:
+  DATABASE_HOST: ${{ secrets.DATABASE_HOST }}
+  DATABASE_PORT: ${{ secrets.DATABASE_PORT }}
+  DATABASE_USER: ${{ secrets.DATABASE_USER }}
+  DATABASE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
+  DATABASE_NAME: ${{ secrets.DATABASE_NAME }}
+  KEYCLOAK_URL: ${{ secrets.KEYCLOAK_URL }}
+  KEYCLOAK_REALM: ${{ secrets.KEYCLOAK_REALM }}
+  KEYCLOAK_CLIENT_ID: ${{ secrets.KEYCLOAK_CLIENT_ID }}
+  KEYCLOAK_SECRET: ${{ secrets.KEYCLOAK_SECRET }}
+  KEYCLOAK_ADMIN: ${{ secrets.KEYCLOAK_ADMIN }}
+  KEYCLOAK_ADMIN_PASSWORD: ${{ secrets.KEYCLOAK_ADMIN_PASSWORD }}
+  KC_DB: ${{ secrets.KC_DB }}
+  KC_DB_URL: ${{ secrets.KC_DB_URL }}
+  KC_DB_USERNAME: ${{ secrets.KC_DB_USERNAME }}
+  KC_DB_PASSWORD: ${{ secrets.KC_DB_PASSWORD }}
+
 jobs:
   audit:
     name: Audit Dependencies
