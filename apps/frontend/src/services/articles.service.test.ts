@@ -40,4 +40,33 @@ describe('Articles Service', () => {
         expect(axios.post).toHaveBeenCalledWith('/api/articles', newArticle);
         expect(result).toEqual(newArticle);
     });
+
+    it('fetches pending articles', async () => {
+        (axios.get as any).mockResolvedValue({ data: mockArticles });
+
+        const result = await articlesService.fetchPendingArticles();
+
+        expect(axios.get).toHaveBeenCalledWith('/api/articles/pending');
+        expect(result).toEqual(mockArticles);
+    });
+
+    it('validates an article', async () => {
+        const article = { ...mockArticles[0], status: ArticleStatus.VALIDATED };
+        (axios.put as any).mockResolvedValue({ data: article });
+
+        const result = await articlesService.validateArticle('1');
+
+        expect(axios.put).toHaveBeenCalledWith('/api/articles/validate/1');
+        expect(result).toEqual(article);
+    });
+
+    it('rejects an article', async () => {
+        const article = { ...mockArticles[0], status: ArticleStatus.REJECTED };
+        (axios.delete as any).mockResolvedValue({ data: article });
+
+        const result = await articlesService.rejectArticle('1');
+
+        expect(axios.delete).toHaveBeenCalledWith('/api/articles/reject/1');
+        expect(result).toEqual(article);
+    });
 });
