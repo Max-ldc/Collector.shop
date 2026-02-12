@@ -1,0 +1,121 @@
+{
+    "id": "collector",
+    "realm": "collector",
+    "enabled": true,
+    "clients": [
+        {
+            "clientId": "collector-frontend",
+            "rootUrl": "http://localhost:5173",
+            "adminUrl": "http://localhost:5173",
+            "baseUrl": "http://localhost:5173",
+            "surrogateAuthRequired": false,
+            "enabled": true,
+            "alwaysDisplayInConsole": false,
+            "clientAuthenticatorType": "client-secret",
+            "redirectUris": [
+                "/*",
+                "http://localhost:5173/*"
+            ],
+            "webOrigins": [
+                "*"
+            ],
+            "notBefore": 0,
+            "bearerOnly": false,
+            "consentRequired": false,
+            "standardFlowEnabled": true,
+            "implicitFlowEnabled": false,
+            "directAccessGrantsEnabled": true,
+            "serviceAccountsEnabled": false,
+            "publicClient": true,
+            "frontchannelLogout": false,
+            "protocol": "openid-connect",
+            "fullScopeAllowed": true
+        },
+        {
+            "clientId": "backend-client",
+            "enabled": true,
+            "clientAuthenticatorType": "client-secret",
+            "secret": "jiYZuiLiGJe1lCz8prsCMQkjwFOqhE0g",
+            "bearerOnly": false,
+            "consentRequired": false,
+            "standardFlowEnabled": false,
+            "implicitFlowEnabled": false,
+            "directAccessGrantsEnabled": true,
+            "serviceAccountsEnabled": true,
+            "publicClient": false,
+            "protocol": "openid-connect",
+            "fullScopeAllowed": true
+        }
+    ],
+    "roles": {
+        "realm": [
+            {
+                "name": "user",
+                "description": "User role"
+            },
+            {
+                "name": "ROLE_ADMIN",
+                "description": "Administrator with full access"
+            },
+            {
+                "name": "ROLE_SELLER",
+                "description": "Seller who can post articles"
+            }
+        ]
+    },
+    "users": [
+        {
+            "username": "admin",
+            "enabled": true,
+            "email": "admin@collector.shop",
+            "firstName": "Admin",
+            "lastName": "User",
+            "credentials": [
+                {
+                    "type": "password",
+                    "value": "admin",
+                    "temporary": false
+                }
+            ],
+            "realmRoles": [
+                "ROLE_ADMIN",
+                "user"
+            ]
+        },
+        {
+            "username": "seller",
+            "enabled": true,
+            "email": "seller@collector.shop",
+            "firstName": "Seller",
+            "lastName": "User",
+            "credentials": [
+                {
+                    "type": "password",
+                    "value": "seller",
+                    "temporary": false
+                }
+            ],
+            "realmRoles": [
+                "ROLE_SELLER",
+                "user"
+            ]
+        },
+        {
+            "username": "user",
+            "enabled": true,
+            "email": "user@collector.shop",
+            "firstName": "Regular",
+            "lastName": "User",
+            "credentials": [
+                {
+                    "type": "password",
+                    "value": "user",
+                    "temporary": false
+                }
+            ],
+            "realmRoles": [
+                "user"
+            ]
+        }
+    ]
+}

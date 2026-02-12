@@ -40,13 +40,13 @@ jobs:
         run: |
           cd apps/backend
           npm install --ignore-scripts
-          cmd /c "npm audit --audit-level=critical || exit 0"
+          npm audit --audit-level=critical || true
 
       - name: Audit Frontend
         run: |
           cd apps/frontend
           npm install --ignore-scripts
-          cmd /c "npm audit --audit-level=critical || exit 0"
+          npm audit --audit-level=critical || true
 
   build-test:
     name: Build & Test
@@ -68,6 +68,7 @@ jobs:
         run: |
           cd apps/backend
           npm ci
+          npm run lint
           npm run test:cov
           npm run build
 
@@ -75,7 +76,8 @@ jobs:
         run: |
           cd apps/frontend
           npm ci
-          npm run test
+          npm run lint
+          npm run test:cov
           npm run build
       
       # Upload coverage for SonarCloud
@@ -84,6 +86,14 @@ jobs:
         with:
           name: backend-coverage
           path: apps/backend/coverage/lcov.info
+          if-no-files-found: error
+          retention-days: 1
+
+      - name: Upload Frontend Coverage
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-coverage
+          path: apps/frontend/coverage/lcov.info
           if-no-files-found: error
           retention-days: 1
 
@@ -101,6 +111,12 @@ jobs:
         with:
           name: backend-coverage
           path: apps/backend/coverage
+
+      - name: Download Frontend Coverage
+        uses: actions/download-artifact@v4
+        with:
+          name: frontend-coverage
+          path: apps/frontend/coverage
 
       - name: SonarCloud Scan
         env:
