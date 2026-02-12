@@ -5,11 +5,10 @@ import {
     Patch,
     Body,
     Param,
-    UseGuards,
 } from '@nestjs/common';
 import { ArticlesService } from './articles.service';
 import { CreateArticleDto } from './dto/create-article.dto';
-import { Roles, AuthenticatedUser, Public, RoleGuard, AuthGuard } from 'nest-keycloak-connect';
+import { Roles, AuthenticatedUser, Public } from 'nest-keycloak-connect';
 
 @Controller('articles')
 export class ArticlesController {
