@@ -6,10 +6,6 @@ on:
   pull_request:
     branches: [ "main" ]
 
-defaults:
-  run:
-    shell: bash
-
 env:
   DATABASE_HOST: ${{ secrets.DATABASE_HOST }}
   DATABASE_PORT: ${{ secrets.DATABASE_PORT }}
@@ -41,16 +37,18 @@ jobs:
           cache-dependency-path: '**/package-lock.json'
       
       - name: Audit Backend
+        continue-on-error: true
         run: |
           cd apps/backend
           npm install --ignore-scripts
-          npm audit --audit-level=critical || true
+          npm audit --audit-level=critical
 
       - name: Audit Frontend
+        continue-on-error: true
         run: |
           cd apps/frontend
           npm install --ignore-scripts
-          npm audit --audit-level=critical || true
+          npm audit --audit-level=critical
 
   build-test:
     name: Build & Test
