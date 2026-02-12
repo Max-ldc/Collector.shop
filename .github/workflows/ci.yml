@@ -71,7 +71,7 @@ jobs:
       - name: Install & Test Backend
         run: |
           cd apps/backend
-          npm ci
+          npm install
           npm run lint
           npm run test:cov
           npm run build
@@ -79,7 +79,7 @@ jobs:
       - name: Install & Test Frontend
         run: |
           cd apps/frontend
-          npm ci
+          npm install
           npm run lint
           npm run test:cov
           npm run build
