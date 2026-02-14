@@ -17,14 +17,15 @@ import { ArticlesModule } from './articles/articles.module';
       database: process.env.DATABASE_NAME || 'collector_db',
       entities: [__dirname + '/**/*.entity{.ts,.js}'],
       synchronize: true, // Note: Set to false in production
+      ssl: { rejectUnauthorized: false }, // Force SSL for Azure PG
     }),
     KeycloakConnectModule.register({
       authServerUrl: process.env.KEYCLOAK_URL,
       realm: process.env.KEYCLOAK_REALM || 'collector-realm',
-      clientId: process.env.KEYCLOAK_CLIENT_ID || 'backend-client',
+      clientId: process.env.KEYCLOAK_CLIENT_ID || 'collector-backend',
       secret: process.env.KEYCLOAK_SECRET || 'secret',
-      // Allow validation of tokens issued by localhost when verify-token-audience is enabled
-      tokenValidation: TokenValidation.NONE,
+      // Strict validation for production security
+      tokenValidation: TokenValidation.ONLINE,
     }),
     ArticlesModule,
   ],

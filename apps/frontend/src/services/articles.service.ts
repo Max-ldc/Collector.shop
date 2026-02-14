@@ -1,10 +1,12 @@
 import axios from 'axios';
 import { Article } from '../types/article.types';
 
-const API_URL = '/api/articles';
+// Modifié pour utiliser l'URL de base de l'environnement ou se rabattre sur le local
+const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+const API_URL = `${BASE_URL}/articles`;
 
 export const fetchValidatedArticles = async (): Promise<Article[]> => {
-  const response = await axios.get(`${API_URL}`);
+  const response = await axios.get(API_URL);
   return response.data;
 };
 
@@ -17,6 +19,7 @@ export const fetchPendingArticles = async (): Promise<Article[]> => {
   const response = await axios.get(`${API_URL}/pending`);
   return response.data;
 };
+
 
 export const validateArticle = async (articleId: string): Promise<Article> => {
   const response = await axios.put(`${API_URL}/validate/${articleId}`);

@@ -1,5 +1,4 @@
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
-import Keycloak from 'keycloak-js';
 import keycloakInstance from '../keycloak';
 
 interface AuthContextType {
@@ -49,7 +48,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     const logout = () => {
         keycloakInstance.logout({
-            redirectUri: window.location.origin
+            redirectUri: globalThis.location.origin
         });
     };
 

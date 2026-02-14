@@ -35,7 +35,7 @@
             "clientId": "backend-client",
             "enabled": true,
             "clientAuthenticatorType": "client-secret",
-            "secret": "jiYZuiLiGJe1lCz8prsCMQkjwFOqhE0g",
+            "secret": "secret",
             "bearerOnly": false,
             "consentRequired": false,
             "standardFlowEnabled": false,
