@@ -126,14 +126,77 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: npx sonarqube-scanner "-Dsonar.token=$SONAR_TOKEN"
 
-  docker-build:
-    name: Docker Build Check
-    runs-on: self-hosted
+  # ==============================================================================
+  # DÉPLOIEMENT CONTINUE (CD) - PUSH TO REGISTRY ONLY
+  # ==============================================================================
+  build-and-push:
+    name: Build & Push Images
+    # On exécute si c'est 'main' (pour déployer) OU si c'est une PR (pour vérifier le build)
+    # L'étape de "Login" et "Push" sera conditionnée plus bas.
+    needs: [build-test, sonar-scan]
+    if: github.ref == 'refs/heads/main' || github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    
+    env:
+      ACR_NAME: acrcollector2659
+      # On utilise 'latest' pour simplifier le déclenchement automatique côté Azure
+      IMAGE_TAG: latest
+      
+      BACKEND_APP_NAME: collector-backend
+      FRONTEND_APP_NAME: collector-frontend
+      
+      # URLs de Prod
+      VITE_API_URL: https://collector-backend.wittyforest-1d08efa7.francecentral.azurecontainerapps.io
+      VITE_KEYCLOAK_URL: https://collector-auth.wittyforest-1d08efa7.francecentral.azurecontainerapps.io
+      VITE_KEYCLOAK_REALM: collector-realm
+      VITE_KEYCLOAK_CLIENT_ID: collector-frontend
+
     steps:
       - uses: actions/checkout@v4
-      
-      - name: Build Backend Image
-        run: docker build -t collector-backend ./apps/backend
 
-      - name: Build Frontend Image
-        run: docker build -t collector-frontend ./apps/frontend
+      # 1. Connexion au Registre (UNIQUEMENT SUR MAIN)
+      - name: Login to ACR
+        if: github.ref == 'refs/heads/main'
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.ACR_NAME }}.azurecr.io
+          username: ${{ secrets.ACR_USERNAME }}
+          password: ${{ secrets.ACR_PASSWORD }}
+
+      # 2. Build Backend (Et Push si Main)
+      - name: Build Backend
+        run: |
+          FULL_IMAGE_NAME="${{ env.ACR_NAME }}.azurecr.io/${{ env.BACKEND_APP_NAME }}:${{ env.IMAGE_TAG }}"
+          
+          # Si Main, on tag et on push. Sinon on build juste.
+          if [ "${{ github.ref }}" == "refs/heads/main" ]; then
+            docker build -t $FULL_IMAGE_NAME ./apps/backend
+            docker push $FULL_IMAGE_NAME
+          else
+            docker build ./apps/backend
+          fi
+
+      # 3. Build Frontend (Et Push si Main)
+      - name: Build Frontend
+        run: |
+          FULL_IMAGE_NAME="${{ env.ACR_NAME }}.azurecr.io/${{ env.FRONTEND_APP_NAME }}:${{ env.IMAGE_TAG }}"
+          
+          # Si Main, on tag et on push. Sinon on build juste.
+          if [ "${{ github.ref }}" == "refs/heads/main" ]; then
+            docker build \
+              --build-arg VITE_API_URL=${{ env.VITE_API_URL }} \
+              --build-arg VITE_KEYCLOAK_URL=${{ env.VITE_KEYCLOAK_URL }} \
+              --build-arg VITE_KEYCLOAK_REALM=${{ env.VITE_KEYCLOAK_REALM }} \
+              --build-arg VITE_KEYCLOAK_CLIENT_ID=${{ env.VITE_KEYCLOAK_CLIENT_ID }} \
+              -t $FULL_IMAGE_NAME ./apps/frontend
+            
+            docker push $FULL_IMAGE_NAME
+          else
+            # Build simple pour validation
+            docker build \
+              --build-arg VITE_API_URL=check \
+              --build-arg VITE_KEYCLOAK_URL=check \
+              --build-arg VITE_KEYCLOAK_REALM=check \
+              --build-arg VITE_KEYCLOAK_CLIENT_ID=check \
+              ./apps/frontend
+          fi

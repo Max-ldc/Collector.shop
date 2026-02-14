@@ -27,7 +27,7 @@ describe('Articles Service', () => {
 
         const result = await articlesService.fetchValidatedArticles();
 
-        expect(axios.get).toHaveBeenCalledWith('/api/articles');
+        expect(axios.get).toHaveBeenCalledWith(expect.stringMatching(/\/articles$/));
         expect(result).toEqual(mockArticles);
     });
 
@@ -37,7 +37,7 @@ describe('Articles Service', () => {
 
         const result = await articlesService.submitArticle(newArticle);
 
-        expect(axios.post).toHaveBeenCalledWith('/api/articles', newArticle);
+        expect(axios.post).toHaveBeenCalledWith(expect.stringMatching(/\/articles$/), newArticle);
         expect(result).toEqual(newArticle);
     });
 
@@ -46,7 +46,7 @@ describe('Articles Service', () => {
 
         const result = await articlesService.fetchPendingArticles();
 
-        expect(axios.get).toHaveBeenCalledWith('/api/articles/pending');
+        expect(axios.get).toHaveBeenCalledWith(expect.stringMatching(/\/articles\/pending$/));
         expect(result).toEqual(mockArticles);
     });
 
@@ -56,7 +56,7 @@ describe('Articles Service', () => {
 
         const result = await articlesService.validateArticle('1');
 
-        expect(axios.put).toHaveBeenCalledWith('/api/articles/validate/1');
+        expect(axios.put).toHaveBeenCalledWith(expect.stringMatching(/\/articles\/validate\/1$/));
         expect(result).toEqual(article);
     });
 
@@ -66,7 +66,7 @@ describe('Articles Service', () => {
 
         const result = await articlesService.rejectArticle('1');
 
-        expect(axios.delete).toHaveBeenCalledWith('/api/articles/reject/1');
+        expect(axios.delete).toHaveBeenCalledWith(expect.stringMatching(/\/articles\/reject\/1$/));
         expect(result).toEqual(article);
     });
 });
