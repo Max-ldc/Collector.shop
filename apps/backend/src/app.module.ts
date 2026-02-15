@@ -1,6 +1,6 @@
-import { Module } from '@nestjs/common';
+import { Module, MiddlewareConsumer, RequestMethod, NestModule } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { KeycloakConnectModule, AuthGuard, RoleGuard, TokenValidation } from 'nest-keycloak-connect';
+import { KeycloakConnectModule, AuthGuard, RoleGuard, TokenValidation, ResourceGuard } from 'nest-keycloak-connect';
 import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -45,16 +45,18 @@ import { CustomPrometheusController } from './observability/prometheus.controlle
       password: process.env.DATABASE_PASSWORD || 'collector',
       database: process.env.DATABASE_NAME || 'collector_db',
       entities: [__dirname + '/**/*.entity{.ts,.js}'],
-      synchronize: true, // Note: Set to false in production
+      synchronize: process.env.NODE_ENV !== 'production', // Set to false in production
       ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
     }),
     KeycloakConnectModule.register({
       authServerUrl: process.env.KEYCLOAK_URL,
-      realm: process.env.KEYCLOAK_REALM || 'collector-realm',
-      clientId: process.env.KEYCLOAK_CLIENT_ID || 'collector-backend',
+      realm: process.env.KEYCLOAK_REALM || 'collector',
+      clientId: process.env.KEYCLOAK_CLIENT_ID || 'backend-client',
       secret: process.env.KEYCLOAK_SECRET || 'secret',
       // Strict validation for production security
-      tokenValidation: TokenValidation.ONLINE,
+      tokenValidation: TokenValidation.OFFLINE,
+      logLevels: ['verbose'], // Enable detailed logging
+      useNestLogger: true,
     }),
     ArticlesModule,
   ],
@@ -66,6 +68,10 @@ import { CustomPrometheusController } from './observability/prometheus.controlle
       provide: APP_GUARD,
       useClass: AuthGuard,
     },
+    // {
+    //   provide: APP_GUARD,
+    //   useClass: ResourceGuard,
+    // },
     {
       provide: APP_GUARD,
       useClass: RoleGuard,
@@ -88,4 +94,18 @@ import { CustomPrometheusController } from './observability/prometheus.controlle
     },
   ],
 })
-export class AppModule { }
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer
+      .apply((req, res, next) => {
+        console.log(`[RequestLogger] ${req.method} ${req.originalUrl}`);
+        if (req.headers.authorization) {
+          console.log(`[RequestLogger] Authorization Header: ${req.headers.authorization}`);
+        } else {
+          console.log('[RequestLogger] Authorization Header: MISSING');
+        }
+        next();
+      })
+      .forRoutes({ path: '*', method: RequestMethod.ALL });
+  }
+}
