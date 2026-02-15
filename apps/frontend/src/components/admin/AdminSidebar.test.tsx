@@ -12,9 +12,8 @@ describe('AdminSidebar', () => {
             </BrowserRouter>
         );
 
-        expect(screen.getByText('Admin Panel')).toBeInTheDocument();
-        expect(screen.getByText('Dashboard')).toBeInTheDocument();
-        expect(screen.getByText('Articles')).toBeInTheDocument();
-        expect(screen.getByRole('link', { name: /Dashboard/i })).toHaveAttribute('href', '/admin');
+        expect(screen.getByText("Panneau d'administration")).toBeInTheDocument();
+        expect(screen.getByText('Tableau de bord')).toBeInTheDocument();
+        expect(screen.getByRole('link', { name: /Tableau de bord/i })).toHaveAttribute('href', '/admin');
     });
 });

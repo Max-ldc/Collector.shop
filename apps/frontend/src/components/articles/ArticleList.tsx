@@ -14,9 +14,13 @@ const ArticleList: React.FC = () => {
     }
 
     return (
-        <div>
-            <h1>Validated Articles</h1>
-            <div className="article-list">
+        <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '2rem' }}>
+            <h1 style={{ color: '#2c3e50', marginBottom: '2rem', textAlign: 'center' }}>Articles en vente</h1>
+            <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
+                gap: '2rem'
+            }}>
                 {articles.map(article => (
                     <ArticleCard key={article.id} article={article} />
                 ))}

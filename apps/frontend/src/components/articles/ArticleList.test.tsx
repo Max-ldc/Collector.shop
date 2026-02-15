@@ -34,8 +34,8 @@ describe('ArticleList Component', () => {
 
     it('renders articles list', () => {
         const mockArticles = [
-            { id: '1', title: 'Article 1', status: ArticleStatus.VALIDATED },
-            { id: '2', title: 'Article 2', status: ArticleStatus.VALIDATED }
+            { id: '1', title: 'Article 1', status: ArticleStatus.VALIDATED, description: 'desc1', price: 10, category: 'cat1', sellerId: 's1', createdAt: new Date() },
+            { id: '2', title: 'Article 2', status: ArticleStatus.VALIDATED, description: 'desc2', price: 20, category: 'cat2', sellerId: 's2', createdAt: new Date() }
         ];
 
         (useArticles as any).mockReturnValue({
@@ -46,7 +46,7 @@ describe('ArticleList Component', () => {
 
         render(<ArticleList />);
 
-        expect(screen.getByText('Validated Articles')).toBeInTheDocument();
+        expect(screen.getByText('Articles en vente')).toBeInTheDocument();
         const cards = screen.getAllByTestId('article-card');
         expect(cards).toHaveLength(2);
         expect(cards[0]).toHaveTextContent('Article 1');

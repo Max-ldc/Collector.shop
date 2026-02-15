@@ -38,10 +38,19 @@ const TestComponent = () => {
 describe('AuthProvider', () => {
     beforeEach(() => {
         vi.clearAllMocks();
+        // Reset properties on the mocked instance
+        (keycloakInstance as any).authenticated = undefined;
+        (keycloakInstance as any).tokenParsed = undefined;
     });
 
     it('should initialize keycloak and update state on success', async () => {
         (keycloakInstance.init as Mock).mockResolvedValue(true);
+        // Restore tokenParsed for this test
+        (keycloakInstance as any).tokenParsed = {
+            realm_access: {
+                roles: ['user', 'admin']
+            }
+        };
 
         await act(async () => {
             render(
@@ -56,6 +65,33 @@ describe('AuthProvider', () => {
             expect(screen.getByTestId('authenticated').textContent).toBe('true');
             expect(screen.getByTestId('roles').textContent).toBe('user,admin');
         });
+    });
+
+    it('should handle pre-existing authentication', async () => {
+        // Simulate Keycloak already initialized
+        keycloakInstance.authenticated = true;
+        keycloakInstance.tokenParsed = {
+            realm_access: {
+                roles: ['existing-role']
+            }
+        };
+
+        await act(async () => {
+            render(
+                <AuthProvider>
+                    <TestComponent />
+                </AuthProvider>
+            );
+        });
+
+        await waitFor(() => {
+            expect(screen.getByTestId('initialized').textContent).toBe('true');
+            expect(screen.getByTestId('authenticated').textContent).toBe('true');
+            expect(screen.getByTestId('roles').textContent).toBe('existing-role');
+        });
+
+        // Ensure init was NOT called
+        expect(keycloakInstance.init).not.toHaveBeenCalled();
     });
 
     it('should handle initialization failure', async () => {
