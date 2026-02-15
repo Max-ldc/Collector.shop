@@ -13,11 +13,11 @@ vi.mock('../../services/articles.service', () => ({
 
 describe('ArticleManagement', () => {
     const mockPending = [
-        { id: '1', title: 'Pending Art 1', status: 'pending', content: '...', authorId: 'a1', createdAt: '...', updatedAt: '...' },
-        { id: '2', title: 'Pending Art 2', status: 'pending', content: '...', authorId: 'a2', createdAt: '...', updatedAt: '...' },
+        { id: '1', title: 'Pending Art 1', status: 'pending', description: 'desc1', price: 10, category: 'cat1', sellerId: 'a1', createdAt: '...', updatedAt: '...' },
+        { id: '2', title: 'Pending Art 2', status: 'pending', description: 'desc2', price: 20, category: 'cat2', sellerId: 'a2', createdAt: '...', updatedAt: '...' },
     ];
     const mockValidated = [
-        { id: '3', title: 'Valid Art 3', status: 'validated', content: '...', authorId: 'a3', createdAt: '...', updatedAt: '...' },
+        { id: '3', title: 'Valid Art 3', status: 'validated', description: 'desc3', price: 30, category: 'cat3', sellerId: 'a3', createdAt: '...', updatedAt: '...' },
     ];
 
     beforeEach(() => {

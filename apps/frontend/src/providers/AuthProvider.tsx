@@ -19,6 +19,16 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     useEffect(() => {
         const initKeycloak = async () => {
+            // Check if Keycloak is already initialized to prevent double init in React.StrictMode
+            if (keycloakInstance.authenticated !== undefined) {
+                setIsAuthenticated(keycloakInstance.authenticated);
+                if (keycloakInstance.authenticated) {
+                    setUserRoles(keycloakInstance.tokenParsed?.realm_access?.roles || []);
+                }
+                setInitialized(true);
+                return;
+            }
+
             try {
                 const authenticated = await keycloakInstance.init({
                     onLoad: 'check-sso',

@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import { useAuth } from '../../hooks/useAuth';
 import { articlesService } from '../../services/articles.service';
+import './SellForm.css';
 
 const SellForm: React.FC = () => {
-    const { user } = useAuth();
     const [title, setTitle] = useState('');
-    const [content, setContent] = useState('');
+    const [description, setDescription] = useState('');
+    const [price, setPrice] = useState<number | ''>('');
+    const [category, setCategory] = useState('');
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
 
@@ -14,52 +15,96 @@ const SellForm: React.FC = () => {
         setError('');
         setSuccess('');
 
-        if (!title || !content) {
-            setError('Title and content are required.');
+        if (title.length < 5) {
+            setError('Le titre doit contenir au moins 5 caractères.');
+            return;
+        }
+
+        if (!title || !description || !price || !category) {
+            setError('Tous les champs sont obligatoires.');
             return;
         }
 
         try {
-            await articlesService.createArticle({
+            await articlesService.submitArticle({
                 title,
-                content,
-                status: 'pending',
-                authorId: user?.id,
+                description,
+                price: Number(price),
+                category,
             });
-            setSuccess('Article submitted successfully!');
+            setSuccess('Article soumis avec succès !');
             setTitle('');
-            setContent('');
-        } catch (err) {
-            setError('Failed to submit article. Please try again.');
+            setDescription('');
+            setPrice('');
+            setCategory('');
+        } catch (err: any) {
+            console.error(err);
+            setError('Échec lors de la soumission de l\'article. Veuillez réessayer.');
         }
     };
 
     return (
-        <form onSubmit={handleSubmit}>
-            <h2>Sell Your Article</h2>
-            {error && <p style={{ color: 'red' }}>{error}</p>}
-            {success && <p style={{ color: 'green' }}>{success}</p>}
-            <div>
-                <label htmlFor="title">Title:</label>
-                <input
-                    type="text"
-                    id="title"
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
-                    required
-                />
-            </div>
-            <div>
-                <label htmlFor="content">Content:</label>
-                <textarea
-                    id="content"
-                    value={content}
-                    onChange={(e) => setContent(e.target.value)}
-                    required
-                />
-            </div>
-            <button type="submit">Submit Article</button>
-        </form>
+        <div className="sell-form-container">
+            <form onSubmit={handleSubmit}>
+                <h2>Vendre un article</h2>
+
+                {error && <div className="message error">{error}</div>}
+                {success && <div className="message success">{success}</div>}
+
+                <div className="form-group">
+                    <label htmlFor="title">Titre :</label>
+                    <input
+                        type="text"
+                        id="title"
+                        value={title}
+                        onChange={(e) => setTitle(e.target.value)}
+                        required
+                        placeholder="Titre de votre article"
+                    />
+                </div>
+
+                <div className="form-group">
+                    <label htmlFor="category">Catégorie :</label>
+                    <input
+                        type="text"
+                        id="category"
+                        value={category}
+                        onChange={(e) => setCategory(e.target.value)}
+                        required
+                        placeholder="Ex: Électronique, Vêtements, etc."
+                    />
+                </div>
+
+                <div className="form-group">
+                    <label htmlFor="price">Prix (€) :</label>
+                    <input
+                        type="number"
+                        id="price"
+                        value={price}
+                        onChange={(e) => setPrice(Number(e.target.value))}
+                        required
+                        min="0"
+                        step="0.01"
+                        placeholder="0.00"
+                    />
+                </div>
+
+                <div className="form-group">
+                    <label htmlFor="description">Description :</label>
+                    <textarea
+                        id="description"
+                        value={description}
+                        onChange={(e) => setDescription(e.target.value)}
+                        required
+                        placeholder="Décrivez votre article en détail..."
+                    />
+                </div>
+
+                <button type="submit" className="submit-btn">
+                    Soumettre l'article
+                </button>
+            </form>
+        </div>
     );
 };
 

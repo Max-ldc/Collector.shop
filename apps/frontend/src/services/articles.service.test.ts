@@ -10,8 +10,10 @@ describe('Articles Service', () => {
         {
             id: '1',
             title: 'Test Article',
-            content: 'Content',
-            authorId: 'user1',
+            description: 'Content',
+            price: 100,
+            category: 'Tech',
+            sellerId: 'user1',
             status: ArticleStatus.VALIDATED,
             createdAt: new Date(),
             updatedAt: new Date()
@@ -52,11 +54,11 @@ describe('Articles Service', () => {
 
     it('validates an article', async () => {
         const article = { ...mockArticles[0], status: ArticleStatus.VALIDATED };
-        (axios.put as any).mockResolvedValue({ data: article });
+        (axios.patch as any).mockResolvedValue({ data: article });
 
         const result = await articlesService.validateArticle('1');
 
-        expect(axios.put).toHaveBeenCalledWith(expect.stringMatching(/\/articles\/validate\/1$/));
+        expect(axios.patch).toHaveBeenCalledWith(expect.stringMatching(/\/articles\/1\/validate$/));
         expect(result).toEqual(article);
     });
 

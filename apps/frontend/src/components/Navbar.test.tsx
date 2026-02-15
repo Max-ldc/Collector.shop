@@ -22,10 +22,10 @@ describe('Navbar', () => {
             </BrowserRouter>
         );
 
-        expect(screen.getByText('Login')).toBeInTheDocument();
-        expect(screen.queryByText('Logout')).not.toBeInTheDocument();
-        expect(screen.queryByText('Sell')).not.toBeInTheDocument();
-        expect(screen.queryByText('Admin')).not.toBeInTheDocument();
+        expect(screen.getByText('Se connecter')).toBeInTheDocument();
+        expect(screen.queryByText('Se déconnecter')).not.toBeInTheDocument();
+        expect(screen.queryByText('Vendre')).not.toBeInTheDocument();
+        expect(screen.queryByText('Administration')).not.toBeInTheDocument();
     });
 
     it('should render logout button and sell link when authenticated', () => {
@@ -42,15 +42,15 @@ describe('Navbar', () => {
             </BrowserRouter>
         );
 
-        expect(screen.getByText('Logout')).toBeInTheDocument();
-        expect(screen.getByText('Sell')).toBeInTheDocument();
-        expect(screen.queryByText('Admin')).not.toBeInTheDocument();
+        expect(screen.getByText('Se déconnecter')).toBeInTheDocument();
+        expect(screen.getByText('Vendre')).toBeInTheDocument();
+        expect(screen.queryByText('Administration')).not.toBeInTheDocument();
     });
 
     it('should render admin link when user has admin role', () => {
         (useAuth as Mock).mockReturnValue({
             isAuthenticated: true,
-            userRoles: ['admin'],
+            userRoles: ['ROLE_ADMIN'],
             login: vi.fn(),
             logout: vi.fn(),
         });
@@ -61,7 +61,7 @@ describe('Navbar', () => {
             </BrowserRouter>
         );
 
-        expect(screen.getByText('Admin')).toBeInTheDocument();
+        expect(screen.getByText('Administration')).toBeInTheDocument();
     });
 
     it('should call login/logout actions', () => {
@@ -81,7 +81,7 @@ describe('Navbar', () => {
             </BrowserRouter>
         );
 
-        fireEvent.click(screen.getByText('Login'));
+        fireEvent.click(screen.getByText('Se connecter'));
         expect(loginMock).toHaveBeenCalled();
 
         (useAuth as Mock).mockReturnValue({
@@ -97,7 +97,7 @@ describe('Navbar', () => {
             </BrowserRouter>
         );
 
-        fireEvent.click(screen.getByText('Logout'));
+        fireEvent.click(screen.getByText('Se déconnecter'));
         expect(logoutMock).toHaveBeenCalled();
     });
 });

@@ -16,7 +16,7 @@ describe('AdminLayout', () => {
             </MemoryRouter>
         );
 
-        expect(screen.getByText('Admin Panel')).toBeInTheDocument(); // Sidebar
+        expect(screen.getByText("Panneau d'administration")).toBeInTheDocument(); // Sidebar
         expect(screen.getByText('Child Content')).toBeInTheDocument(); // Outlet
     });
 });

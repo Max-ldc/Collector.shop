@@ -12,7 +12,7 @@ describe('useArticles Hook', () => {
 
     it('fetches articles initially', async () => {
         (fetchValidatedArticles as any).mockResolvedValue([
-            { id: '1', title: 'Test', status: 'validated' }
+            { id: '1', title: 'Test', status: 'validated', description: 'desc', price: 10, category: 'cat', sellerId: 's1' }
         ]);
 
         const { result } = renderHook(() => useArticles());

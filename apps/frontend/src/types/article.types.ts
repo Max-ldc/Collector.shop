@@ -1,8 +1,10 @@
 export interface Article {
     id: string;
     title: string;
-    content: string;
-    authorId: string;
+    description: string;
+    price: number;
+    category: string;
+    sellerId: string;
     status: ArticleStatus;
     createdAt: Date;
     updatedAt: Date;

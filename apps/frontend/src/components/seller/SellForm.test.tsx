@@ -1,87 +1,88 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import SellForm from './SellForm';
-import { useAuth } from '../../hooks/useAuth';
 import { articlesService } from '../../services/articles.service';
 import { describe, it, expect, vi, beforeEach, Mock } from 'vitest';
 
 // Mock dependencies
-vi.mock('../../hooks/useAuth');
 vi.mock('../../services/articles.service', () => ({
     articlesService: {
-        createArticle: vi.fn(),
+        submitArticle: vi.fn(),
     },
 }));
 
 describe('SellForm', () => {
-    const mockUser = { id: 'user-123' };
 
     beforeEach(() => {
         vi.clearAllMocks();
-        (useAuth as Mock).mockReturnValue({ user: mockUser });
     });
 
     it('should render the form correctly', () => {
         render(<SellForm />);
-        expect(screen.getByText('Sell Your Article')).toBeInTheDocument();
-        expect(screen.getByLabelText(/Title/i)).toBeInTheDocument();
-        expect(screen.getByLabelText(/Content/i)).toBeInTheDocument();
-        expect(screen.getByRole('button', { name: /Submit Article/i })).toBeInTheDocument();
-    });
-
-    it('should show error when fields are empty', async () => {
-        render(<SellForm />);
-
-        // title and content state are empty by default, but required attribute prevents submission
-        // However, the handleSubmit function checks for empty title/content
-
-        // We can manually bypass HTML5 validation or just test the logic inside handleSubmit if we could invoke it directly, 
-        // but here we are integration testing.
-
-        // Actually the inputs have `required` attribute.
-        // But the handler also has a check: `if (!title || !content)`
-
-        // Let's try to fill one but not the other?
-        // Or mock the state?
-
-        // Let's rely on validation
+        expect(screen.getByText('Vendre un article')).toBeInTheDocument();
+        expect(screen.getByLabelText(/Titre/i)).toBeInTheDocument();
+        expect(screen.getByLabelText(/Catégorie/i)).toBeInTheDocument();
+        expect(screen.getByLabelText(/Prix/i)).toBeInTheDocument();
+        expect(screen.getByLabelText(/Description/i)).toBeInTheDocument();
+        expect(screen.getByRole('button', { name: "Soumettre l'article" })).toBeInTheDocument();
     });
 
     it('should submit the form successfully with valid data', async () => {
-        (articlesService.createArticle as Mock).mockResolvedValue({ id: '1', title: 'Test' });
+        (articlesService.submitArticle as Mock).mockResolvedValue({ id: '1', title: 'Test Article' });
 
         render(<SellForm />);
 
-        fireEvent.change(screen.getByLabelText(/Title/i), { target: { value: 'My Item' } });
-        fireEvent.change(screen.getByLabelText(/Content/i), { target: { value: 'Description' } });
+        fireEvent.change(screen.getByLabelText(/Titre/i), { target: { value: 'Mon Article Valide' } });
+        fireEvent.change(screen.getByLabelText(/Catégorie/i), { target: { value: 'Vêtements' } });
+        fireEvent.change(screen.getByLabelText(/Prix/i), { target: { value: '20' } });
+        fireEvent.change(screen.getByLabelText(/Description/i), { target: { value: 'Une belle description' } });
 
-        fireEvent.click(screen.getByRole('button', { name: /Submit Article/i }));
+        fireEvent.click(screen.getByRole('button', { name: "Soumettre l'article" }));
 
         await waitFor(() => {
-            expect(articlesService.createArticle).toHaveBeenCalledWith({
-                title: 'My Item',
-                content: 'Description',
-                status: 'pending',
-                authorId: 'user-123',
+            expect(articlesService.submitArticle).toHaveBeenCalledWith({
+                title: 'Mon Article Valide',
+                description: 'Une belle description',
+                price: 20,
+                category: 'Vêtements',
             });
-            expect(screen.getByText('Article submitted successfully!')).toBeInTheDocument();
+            expect(screen.getByText('Article soumis avec succès !')).toBeInTheDocument();
             // Fields cleared
-            expect(screen.getByLabelText(/Title/i)).toHaveValue('');
+            expect(screen.getByLabelText(/Titre/i)).toHaveValue('');
         });
     });
 
+    it('should show error when title is too short', async () => {
+        render(<SellForm />);
+
+        fireEvent.change(screen.getByLabelText(/Titre/i), { target: { value: '1234' } }); // < 5 chars
+        fireEvent.change(screen.getByLabelText(/Catégorie/i), { target: { value: 'Vêtements' } });
+        fireEvent.change(screen.getByLabelText(/Prix/i), { target: { value: '20' } });
+        fireEvent.change(screen.getByLabelText(/Description/i), { target: { value: 'Une belle description' } });
+
+        fireEvent.click(screen.getByRole('button', { name: "Soumettre l'article" }));
+
+        await waitFor(() => {
+            expect(screen.getByText('Le titre doit contenir au moins 5 caractères.')).toBeInTheDocument();
+        });
+
+        expect(articlesService.submitArticle).not.toHaveBeenCalled();
+    });
+
     it('should handle submission error', async () => {
-        (articlesService.createArticle as Mock).mockRejectedValue(new Error('Failed'));
+        (articlesService.submitArticle as Mock).mockRejectedValue(new Error('Failed'));
 
         render(<SellForm />);
 
-        fireEvent.change(screen.getByLabelText(/Title/i), { target: { value: 'My Item' } });
-        fireEvent.change(screen.getByLabelText(/Content/i), { target: { value: 'Description' } });
+        fireEvent.change(screen.getByLabelText(/Titre/i), { target: { value: 'Mon Article' } });
+        fireEvent.change(screen.getByLabelText(/Catégorie/i), { target: { value: 'Vêtements' } });
+        fireEvent.change(screen.getByLabelText(/Prix/i), { target: { value: '20' } });
+        fireEvent.change(screen.getByLabelText(/Description/i), { target: { value: 'Une belle description' } });
 
-        fireEvent.click(screen.getByRole('button', { name: /Submit Article/i }));
+        fireEvent.click(screen.getByRole('button', { name: "Soumettre l'article" }));
 
         await waitFor(() => {
-            expect(screen.getByText('Failed to submit article. Please try again.')).toBeInTheDocument();
+            expect(screen.getByText("Échec lors de la soumission de l'article. Veuillez réessayer.")).toBeInTheDocument();
         });
     });
 });
