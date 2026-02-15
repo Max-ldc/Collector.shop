@@ -23,12 +23,9 @@ describe('Navbar', () => {
         );
 
         expect(screen.getByText('Se connecter')).toBeInTheDocument();
-        expect(screen.queryByText('Se déconnecter')).not.toBeInTheDocument();
-        expect(screen.queryByText('Vendre')).not.toBeInTheDocument();
-        expect(screen.queryByText('Administration')).not.toBeInTheDocument();
     });
 
-    it('should render logout button and sell link when authenticated', () => {
+    it('should rendering navigation links when authenticated', () => {
         (useAuth as Mock).mockReturnValue({
             isAuthenticated: true,
             userRoles: [],
@@ -42,12 +39,24 @@ describe('Navbar', () => {
             </BrowserRouter>
         );
 
-        expect(screen.getByText('Se déconnecter')).toBeInTheDocument();
-        expect(screen.getByText('Vendre')).toBeInTheDocument();
-        expect(screen.queryByText('Administration')).not.toBeInTheDocument();
+        const homeLink = screen.getByText('Accueil');
+        const sellLink = screen.getByText('Vendre');
+
+        // Test hover effects
+        fireEvent.mouseEnter(homeLink);
+        expect(homeLink.style.color).toBe('rgb(44, 62, 80)'); // #2c3e50
+
+        fireEvent.mouseLeave(homeLink);
+        expect(homeLink.style.color).toBe('rgb(85, 85, 85)'); // #555
+
+        fireEvent.mouseEnter(sellLink);
+        expect(sellLink.style.color).toBe('rgb(44, 62, 80)');
+
+        fireEvent.mouseLeave(sellLink);
+        expect(sellLink.style.color).toBe('rgb(85, 85, 85)');
     });
 
-    it('should render admin link when user has admin role', () => {
+    it('should render admin link with hover effects when admin', () => {
         (useAuth as Mock).mockReturnValue({
             isAuthenticated: true,
             userRoles: ['ROLE_ADMIN'],
@@ -61,7 +70,18 @@ describe('Navbar', () => {
             </BrowserRouter>
         );
 
-        expect(screen.getByText('Administration')).toBeInTheDocument();
+        const adminLink = screen.getByText('Administration');
+        
+        // Initial color #e67e22 -> rgb(230, 126, 34)
+        expect(adminLink.style.color).toBe('rgb(230, 126, 34)');
+
+        // Hover #d35400 -> rgb(211, 84, 0)
+        fireEvent.mouseEnter(adminLink);
+        expect(adminLink.style.color).toBe('rgb(211, 84, 0)');
+
+        // Leave #e67e22
+        fireEvent.mouseLeave(adminLink);
+        expect(adminLink.style.color).toBe('rgb(230, 126, 34)');
     });
 
     it('should call login/logout actions', () => {

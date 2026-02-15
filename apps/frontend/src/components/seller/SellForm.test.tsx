@@ -85,4 +85,26 @@ describe('SellForm', () => {
             expect(screen.getByText("Échec lors de la soumission de l'article. Veuillez réessayer.")).toBeInTheDocument();
         });
     });
+
+    it('should show error when fields are missing', async () => {
+        render(<SellForm />);
+        
+        // Only set title (length > 5)
+        fireEvent.change(screen.getByLabelText(/Titre/i), { target: { value: 'Valid Title' } });
+        // Leave others empty
+        
+        // Just bypass validation by creating a submit event directly on the form
+        const form = screen.getByRole('button', { name: "Soumettre l'article" }).closest('form');
+        if (form) {
+            // We use fireEvent.submit to bypass "required" check if JSDOM enforces it,
+            // or to ensure the handler is called.
+            // Note: JSDOM usually allows submission even if invalid unless prevention logic exists.
+            // But let's try strict submit.
+             fireEvent.submit(form);
+        }
+        
+        await waitFor(() => {
+             expect(screen.getByText('Tous les champs sont obligatoires.')).toBeInTheDocument();
+        });
+    });
 });
