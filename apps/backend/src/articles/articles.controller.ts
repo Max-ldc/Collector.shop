@@ -15,7 +15,7 @@ export class ArticlesController {
     constructor(private readonly articlesService: ArticlesService) { }
 
     @Post()
-    @Roles({ roles: ['ROLE_SELLER'] })
+    @Roles({ roles: ['realm:ROLE_SELLER', 'realm:ROLE_ADMIN'] })
     create(@Body() createArticleDto: CreateArticleDto, @AuthenticatedUser() user: any) {
         console.log('--- ENTERING CONTROLLER ---');
         console.log('User:', user);
@@ -28,9 +28,15 @@ export class ArticlesController {
     }
 
     @Patch(':id/validate')
-    @Roles({ roles: ['ROLE_ADMIN'] })
+    @Roles({ roles: ['realm:ROLE_ADMIN'] })
     validate(@Param('id') id: string) {
         return this.articlesService.validate(id);
+    }
+
+    @Get('pending')
+    @Roles({ roles: ['realm:ROLE_ADMIN'] })
+    findPending() {
+        return this.articlesService.findAllPending();
     }
 
     @Get()

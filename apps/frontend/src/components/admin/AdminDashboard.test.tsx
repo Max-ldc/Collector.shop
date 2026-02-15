@@ -17,9 +17,9 @@ vi.mock('../../services/articles.service', () => ({
 const mockPendingArticle: Article = {
     id: 'pending-1',
     title: 'Pending Article',
-    description: 'Description', 
-    price: 100, 
-    category: 'Test', 
+    description: 'Description',
+    price: 100,
+    category: 'Test',
     sellerId: 'user1',
     status: ArticleStatus.PENDING,
     createdAt: new Date(),
@@ -29,9 +29,9 @@ const mockPendingArticle: Article = {
 const mockValidatedArticle: Article = {
     id: 'validated-1',
     title: 'Validated Article',
-    description: 'Description', 
-    price: 200, 
-    category: 'Test', 
+    description: 'Description',
+    price: 200,
+    category: 'Test',
     sellerId: 'user2',
     status: ArticleStatus.VALIDATED,
     createdAt: new Date(),
@@ -54,7 +54,7 @@ describe('AdminDashboard', () => {
         );
 
         expect(screen.getByText('Tableau de bord administrateur')).toBeInTheDocument();
-        
+
         await waitFor(() => {
             expect(screen.getByText('Aucun article en attente de validation.')).toBeInTheDocument();
             expect(screen.getByText('Aucun article validé pour le moment.')).toBeInTheDocument();
@@ -124,9 +124,9 @@ describe('AdminDashboard', () => {
             expect(screen.queryByText('Pending Article')).not.toBeInTheDocument();
         });
     });
-    
+
     it('should handle load error', async () => {
-        const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+        const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => { });
         (articlesService.fetchPendingArticles as any).mockRejectedValue(new Error('Fetch failed'));
         (articlesService.fetchValidatedArticles as any).mockResolvedValue([]);
 
@@ -135,9 +135,9 @@ describe('AdminDashboard', () => {
                 <AdminDashboard />
             </BrowserRouter>
         );
-        
+
         await waitFor(() => {
-             expect(consoleSpy).toHaveBeenCalledWith("Failed to load articles", expect.any(Error));
+            expect(consoleSpy).toHaveBeenCalledWith("Failed to load articles", expect.any(Error));
         });
         consoleSpy.mockRestore();
     });

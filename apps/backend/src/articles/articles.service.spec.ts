@@ -163,4 +163,21 @@ describe('ArticlesService', () => {
             expect(result).toEqual([]);
         });
     });
+
+    describe('findAllPending', () => {
+        it('should return only pending articles', async () => {
+            const pendingArticles = [
+                { id: 'uuid-3', status: ArticleStatus.PENDING },
+            ] as Article[];
+
+            repository.find.mockResolvedValue(pendingArticles);
+
+            const result = await service.findAllPending();
+
+            expect(repository.find).toHaveBeenCalledWith({
+                where: { status: ArticleStatus.PENDING },
+            });
+            expect(result).toHaveLength(1);
+        });
+    });
 });

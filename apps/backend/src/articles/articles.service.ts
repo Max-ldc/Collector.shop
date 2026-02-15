@@ -43,4 +43,10 @@ export class ArticlesService {
             where: { status: ArticleStatus.VALIDATED },
         });
     }
+
+    async findAllPending(): Promise<Article[]> {
+        return this.articleRepository.find({
+            where: { status: ArticleStatus.PENDING },
+        });
+    }
 }

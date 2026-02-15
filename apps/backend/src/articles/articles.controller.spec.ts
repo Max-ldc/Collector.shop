@@ -3,6 +3,7 @@ import { ArticlesController } from './articles.controller';
 import { ArticlesService } from './articles.service';
 import { CreateArticleDto } from './dto/create-article.dto';
 import { Article, ArticleStatus } from './entities/article.entity';
+import { META_ROLES } from 'nest-keycloak-connect'; // Import from library
 
 describe('ArticlesController', () => {
     let controller: ArticlesController;
@@ -18,6 +19,7 @@ describe('ArticlesController', () => {
                         create: jest.fn(),
                         validate: jest.fn(),
                         findAllValidated: jest.fn(),
+                        findAllPending: jest.fn(),
                     },
                 },
             ],
@@ -32,6 +34,14 @@ describe('ArticlesController', () => {
     });
 
     describe('create', () => {
+        it('should have correct roles for access control', () => {
+            const rolesMetadata = Reflect.getMetadata(META_ROLES, controller.create);
+            expect(rolesMetadata).toBeDefined();
+            // The structure of metadata from nest-keycloak-connect might vary, usually it's { roles: [...] }
+            expect(rolesMetadata.roles).toContain('realm:ROLE_SELLER');
+            expect(rolesMetadata.roles).toContain('realm:ROLE_ADMIN');
+        });
+
         it('should create an article with the authenticated user id', async () => {
             const dto: CreateArticleDto = {
                 title: 'Test Article',
@@ -101,6 +111,21 @@ describe('ArticlesController', () => {
 
             expect(service.validate).toHaveBeenCalledWith('uuid-1');
             expect(result.status).toBe(ArticleStatus.VALIDATED);
+        });
+    });
+
+    describe('findPending', () => {
+        it('should return all pending articles', async () => {
+            const pendingArticles = [
+                { id: 'uuid-1', status: ArticleStatus.PENDING },
+            ] as Article[];
+
+            service.findAllPending.mockResolvedValue(pendingArticles);
+
+            const result = await controller.findPending();
+
+            expect(service.findAllPending).toHaveBeenCalled();
+            expect(result).toEqual(pendingArticles);
         });
     });
 
