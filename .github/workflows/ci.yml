@@ -216,7 +216,7 @@ jobs:
       FRONTEND_APP_NAME: collector-frontend
       
       # URLs de Prod
-      VITE_API_URL: https://collector-backend.wittyforest-1d08efa7.francecentral.azurecontainerapps.io
+      VITE_API_URL: https://collector-backend.wittyforest-1d08efa7.francecentral.azurecontainerapps.io/api
       VITE_KEYCLOAK_URL: https://collector-auth.wittyforest-1d08efa7.francecentral.azurecontainerapps.io
       VITE_KEYCLOAK_REALM: collector-realm
       VITE_KEYCLOAK_CLIENT_ID: collector-frontend
