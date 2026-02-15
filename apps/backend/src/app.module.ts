@@ -4,7 +4,6 @@ import { KeycloakConnectModule, AuthGuard, RoleGuard, TokenValidation, ResourceG
 import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-// import { DebugGuard } from './debug.guard';
 import { ArticlesModule } from './articles/articles.module';
 import { LoggerModule } from 'nestjs-pino';
 import {
@@ -69,10 +68,6 @@ import { CustomPrometheusController } from './observability/prometheus.controlle
       provide: APP_GUARD,
       useClass: AuthGuard,
     },
-    // {
-    //   provide: APP_GUARD,
-    //   useClass: DebugGuard, // Inspects the user object populated by AuthGuard
-    // },
     // {
     //   provide: APP_GUARD,
     //   useClass: ResourceGuard,
