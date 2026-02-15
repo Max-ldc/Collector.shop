@@ -6,6 +6,11 @@ on:
   pull_request:
     branches: [ "main" ]
 
+# Permissions nécessaires pour dorny/paths-filter
+permissions:
+  contents: read
+  pull-requests: read
+
 env:
   DATABASE_HOST: ${{ secrets.DATABASE_HOST }}
   DATABASE_PORT: ${{ secrets.DATABASE_PORT }}
@@ -24,6 +29,20 @@ env:
   KC_DB_PASSWORD: ${{ secrets.KC_DB_PASSWORD }}
 
 jobs:
+  # Job to check file changes for conditional execution
+  check-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      observability: ${{ steps.filter.outputs.observability }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            observability:
+              - 'apps/observability/**'
+
   audit:
     name: Audit Dependencies
     runs-on: self-hosted
@@ -125,6 +144,57 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: npx sonarqube-scanner "-Dsonar.token=$SONAR_TOKEN"
+
+  # ==============================================================================
+  # DÉPLOIEMENT CONTINUE (CD) - OBSERVABILITY
+  # ==============================================================================
+  build-push-observability:
+    name: Build & Push Observability
+    # Run only if observability files changed or if manually triggered (always run on main push if changed)
+    needs: [check-changes]
+    # Execute if observability changed AND (it's main branch OR it's a PR)
+    if: needs.check-changes.outputs.observability == 'true' && (github.ref == 'refs/heads/main' || github.event_name == 'pull_request')
+    runs-on: ubuntu-latest
+    
+    env:
+      ACR_NAME: acrcollector2659
+      IMAGE_TAG: latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # Connexion au Registre (UNIQUEMENT SUR MAIN)
+      - name: Login to ACR
+        if: github.ref == 'refs/heads/main'
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.ACR_NAME }}.azurecr.io
+          username: ${{ secrets.ACR_USERNAME }}
+          password: ${{ secrets.ACR_PASSWORD }}
+
+      # Build & Push Prometheus
+      - name: Build Prometheus
+        run: |
+          FULL_IMAGE_NAME="${{ env.ACR_NAME }}.azurecr.io/prometheus-custom:${{ env.IMAGE_TAG }}"
+          
+          if [ "${{ github.ref }}" == "refs/heads/main" ]; then
+            docker build -t $FULL_IMAGE_NAME -f apps/observability/Dockerfile.prometheus apps/observability/
+            docker push $FULL_IMAGE_NAME
+          else
+            docker build -f apps/observability/Dockerfile.prometheus apps/observability/
+          fi
+
+      # Build & Push Grafana
+      - name: Build Grafana
+        run: |
+          FULL_IMAGE_NAME="${{ env.ACR_NAME }}.azurecr.io/grafana-custom:${{ env.IMAGE_TAG }}"
+          
+          if [ "${{ github.ref }}" == "refs/heads/main" ]; then
+            docker build -t $FULL_IMAGE_NAME -f apps/observability/Dockerfile.grafana apps/observability/
+            docker push $FULL_IMAGE_NAME
+          else
+            docker build -f apps/observability/Dockerfile.grafana apps/observability/
+          fi
 
   # ==============================================================================
   # DÉPLOIEMENT CONTINUE (CD) - PUSH TO REGISTRY ONLY

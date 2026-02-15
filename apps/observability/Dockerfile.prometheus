@@ -1,0 +1,3 @@
+FROM prom/prometheus:latest
+# On écrase la config par défaut pour inclure nos cibles
+COPY prometheus.yml /etc/prometheus/prometheus.yml

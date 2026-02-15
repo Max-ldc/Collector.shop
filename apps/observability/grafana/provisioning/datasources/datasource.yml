@@ -1,0 +1,11 @@
+apiVersion: 1
+
+datasources:
+  - name: Prometheus
+    type: prometheus
+    access: proxy
+    # Important : C'est ici qu'on définit l'URL de Prometheus.
+    # Dans Azure Container Apps, même en interne, l'appel se fait souvent en HTTPS via le FQDN.
+    # On utilise l'URL INTERNE complète :
+    url: https://collector-prometheus.internal.wittyforest-1d08efa7.francecentral.azurecontainerapps.io
+    isDefault: true
