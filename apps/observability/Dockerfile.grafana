@@ -1,0 +1,27 @@
+# Dockerfile pour Grafana avec Dashboard "Pre-Loaded"
+FROM grafana/grafana:latest
+
+# --- CORRECTION DU PROBLEME DE REDIRECTION (BOUCLE INFINIE) ---
+# Azure Container Apps termine le SSL avant d'arriver au conteneur.
+# Grafana doit savoir qu'il est derrière un proxy HTTPS.
+ENV GF_SERVER_ROOT_URL="%(protocol)s://%(domain)s:%(http_port)s/"
+ENV GF_SERVER_SERVE_FROM_SUB_PATH="false"
+ENV GF_SERVER_ENABLE_GZIP="true"
+# Important : Si vous avez encore des problèmes, forcez le ROOT_URL avec votre vraie URL publique :
+# ENV GF_SERVER_ROOT_URL="https://collector-grafana.<votre-suffixe>.azurecontainerapps.io/"
+
+# --- CONFIGURATION OBSERVABILITE ---
+
+# Copie des fichiers de configuration pour la datasource Prometheus
+COPY grafana/provisioning/datasources/datasource.yml /etc/grafana/provisioning/datasources/datasource.yml
+
+# Copie de la configuration pour charger le Dashboard JSON
+COPY grafana/provisioning/dashboards/dashboard.yml /etc/grafana/provisioning/dashboards/dashboard.yml
+
+# Changement d'emplacement pour eviter les problemes de scan
+# On s'assure que le dossier existe et on copie le fichier
+USER root
+RUN mkdir -p /var/lib/grafana/dashboards
+COPY grafana-dashboard.json /var/lib/grafana/dashboards/collector-dashboard.json
+# On rétablit l'utilisateur grafana pour la securite
+USER grafana
