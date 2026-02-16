@@ -5,7 +5,25 @@ scrape_configs:
   - job_name: 'collector-backend'
     scheme: https
     # IMPORTANT : targets doit etre "host:port", pas "https://...". Le scheme est defini au dessus.
+    metrics_path: /api/metrics
+    # Essayons l'adresse interne pour eviter le hairpinning du Load Balancer
     static_configs:
-      - targets: ['collector-backend.wittyforest-1d08efa7.francecentral.azurecontainerapps.io:443']
+      - targets: ['collector-backend.internal.wittyforest-1d08efa7.francecentral.azurecontainerapps.io:443']
+    tls_config:
+      insecure_skip_verify: true
+
+  - job_name: 'collector-grafana'
+    scheme: https
+    metrics_path: /metrics
+    static_configs:
+      - targets: ['collector-grafana.internal.wittyforest-1d08efa7.francecentral.azurecontainerapps.io:443']
+    tls_config:
+      insecure_skip_verify: true
+
+  - job_name: 'collector-prometheus'
+    scheme: https
+    metrics_path: /metrics
+    static_configs:
+      - targets: ['collector-prometheus.internal.wittyforest-1d08efa7.francecentral.azurecontainerapps.io:443']
     tls_config:
       insecure_skip_verify: true
