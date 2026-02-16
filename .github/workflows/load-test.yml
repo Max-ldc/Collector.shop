@@ -1,0 +1,71 @@
+name: Load Test (Smoke)
+
+on:
+  # Déclenchement après le déploiement (manuellement ou via workflow_run)
+  workflow_run:
+    workflows: ["CI/CD Pipeline"]
+    types: [completed]
+    branches: [main]
+
+  # Déclenchement manuel pour tests à la demande
+  workflow_dispatch:
+    inputs:
+      target_vus:
+        description: 'Nombre de VUs max'
+        required: false
+        default: '10'
+      duration:
+        description: 'Durée du plateau (ex: 30s, 1m)'
+        required: false
+        default: '30s'
+
+permissions:
+  contents: read
+
+env:
+  BASE_URL: ${{ secrets.LOAD_TEST_BASE_URL }}
+  KEYCLOAK_URL: ${{ secrets.KEYCLOAK_URL }}
+  KC_REALM: ${{ secrets.KEYCLOAK_REALM }}
+  KC_CLIENT_ID: ${{ secrets.KEYCLOAK_CLIENT_ID }}
+  KC_USERNAME: ${{ secrets.LOAD_TEST_KC_USERNAME }}
+  KC_PASSWORD: ${{ secrets.LOAD_TEST_KC_PASSWORD }}
+
+jobs:
+  smoke-load-test:
+    name: Smoke Load Test (post-deploy)
+    runs-on: ubuntu-latest
+    # Ne lancer que si le workflow CI/CD a réussi (ou en dispatch manuel)
+    if: >
+      github.event_name == 'workflow_dispatch' ||
+      github.event.workflow_run.conclusion == 'success'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install k6
+        run: |
+          K6_VERSION="v1.6.1"
+          curl -fsSL -o /tmp/k6.deb "https://github.com/grafana/k6/releases/download/${K6_VERSION}/k6-${K6_VERSION}-linux-amd64.deb"
+          sudo dpkg -i /tmp/k6.deb
+          rm /tmp/k6.deb
+          k6 version
+
+      - name: Run k6 Smoke Test
+        run: |
+          k6 run tests/load-test.js \
+            --env BASE_URL="${{ env.BASE_URL }}" \
+            --env KEYCLOAK_URL="${{ env.KEYCLOAK_URL }}" \
+            --env KC_REALM="${{ env.KC_REALM }}" \
+            --env KC_CLIENT_ID="${{ env.KC_CLIENT_ID }}" \
+            --env KC_USERNAME="${{ env.KC_USERNAME }}" \
+            --env KC_PASSWORD="${{ env.KC_PASSWORD }}" \
+            --summary-trend-stats="avg,min,med,max,p(90),p(95),p(99)"
+
+      - name: Upload k6 Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: k6-results-${{ github.run_id }}
+          path: k6-results.json
+          if-no-files-found: ignore
+          retention-days: 30
