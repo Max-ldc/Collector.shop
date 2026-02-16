@@ -52,6 +52,7 @@ jobs:
 
       - name: Run k6 Smoke Test
         run: |
+          mkdir -p k6-results
           k6 run tests/load-test.js \
             --env BASE_URL="${{ env.BASE_URL }}" \
             --env KEYCLOAK_URL="${{ env.KEYCLOAK_URL }}" \
@@ -61,11 +62,11 @@ jobs:
             --env KC_PASSWORD="${{ env.KC_PASSWORD }}" \
             --summary-trend-stats="avg,min,med,max,p(90),p(95),p(99)"
 
-      - name: Upload k6 Results
+      - name: Upload k6 Summary Report
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: k6-results-${{ github.run_id }}
-          path: k6-results.json
-          if-no-files-found: ignore
-          retention-days: 30
+          name: k6-load-test-report-${{ github.run_id }}
+          path: k6-results/
+          if-no-files-found: warn
+          retention-days: 90
