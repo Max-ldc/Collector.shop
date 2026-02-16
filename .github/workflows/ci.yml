@@ -150,10 +150,9 @@ jobs:
   # ==============================================================================
   build-push-observability:
     name: Build & Push Observability
-    # Run only if observability files changed or if manually triggered (always run on main push if changed)
+    # Run only if observability files changed AND if it is on main branch
     needs: [check-changes]
-    # Execute if observability changed AND (it's main branch OR it's a PR)
-    if: needs.check-changes.outputs.observability == 'true' && (github.ref == 'refs/heads/main' || github.event_name == 'pull_request')
+    if: needs.check-changes.outputs.observability == 'true' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     
     env:
@@ -201,10 +200,9 @@ jobs:
   # ==============================================================================
   build-and-push:
     name: Build & Push Images
-    # On exécute si c'est 'main' (pour déployer) OU si c'est une PR (pour vérifier le build)
-    # L'étape de "Login" et "Push" sera conditionnée plus bas.
+    # On exécute UNIQUEMENT sur 'main' (après merge) pour déployer
     needs: [build-test, sonar-scan]
-    if: github.ref == 'refs/heads/main' || github.event_name == 'pull_request'
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     
     env:

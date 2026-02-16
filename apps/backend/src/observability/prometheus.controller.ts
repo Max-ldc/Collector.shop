@@ -3,7 +3,7 @@ import { PrometheusController } from '@willsoto/nestjs-prometheus';
 import { Response } from 'express';
 import { Public } from 'nest-keycloak-connect';
 
-@Controller()
+@Controller('metrics')
 export class CustomPrometheusController extends PrometheusController {
     @Public()
     @Get()

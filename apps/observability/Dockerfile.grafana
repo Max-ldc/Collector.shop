@@ -4,7 +4,8 @@ FROM grafana/grafana:latest
 # --- CORRECTION DU PROBLEME DE REDIRECTION (BOUCLE INFINIE) ---
 # Azure Container Apps termine le SSL avant d'arriver au conteneur.
 # Grafana doit savoir qu'il est derrière un proxy HTTPS.
-ENV GF_SERVER_ROOT_URL="%(protocol)s://%(domain)s:%(http_port)s/"
+# ENV GF_SERVER_ROOT_URL="%(protocol)s://%(domain)s:%(http_port)s/"
+ENV GF_SERVER_ROOT_URL="https://collector-grafana.wittyforest-1d08efa7.francecentral.azurecontainerapps.io/"
 ENV GF_SERVER_SERVE_FROM_SUB_PATH="false"
 ENV GF_SERVER_ENABLE_GZIP="true"
 # Important : Si vous avez encore des problèmes, forcez le ROOT_URL avec votre vraie URL publique :
