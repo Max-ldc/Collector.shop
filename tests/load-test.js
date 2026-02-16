@@ -2,6 +2,7 @@ import http from 'k6/http';
 import { check, sleep, fail } from 'k6';
 import { SharedArray } from 'k6/data';
 import { randomIntBetween } from 'https://jslib.k6.io/k6-utils/1.4.0/index.js';
+import { textSummary } from 'https://jslib.k6.io/k6-summary/0.1.0/index.js';
 
 // ---------------------------------------------------------------------------
 // Configuration – Variables d'environnement
@@ -126,6 +127,21 @@ export default function (data) {
 
     // Simule un temps de réflexion réaliste entre requêtes (1-3s)
     sleep(randomIntBetween(1, 3));
+}
+
+// ---------------------------------------------------------------------------
+// Génération du rapport de résultats (artefacts CI/CD)
+// ---------------------------------------------------------------------------
+export function handleSummary(data) {
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+    return {
+        // Résumé lisible dans stdout (affiché dans les logs CI)
+        stdout: textSummary(data, { indent: '  ', enableColors: true }),
+        // Fichier texte du résumé (artefact lisible)
+        'k6-results/summary.txt': textSummary(data, { indent: '  ', enableColors: false }),
+        // Fichier JSON complet des métriques (artefact exploitable)
+        'k6-results/summary.json': JSON.stringify(data, null, 2),
+    };
 }
 
 // ---------------------------------------------------------------------------
