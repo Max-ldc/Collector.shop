@@ -6,12 +6,12 @@ import { ArticleStatus } from '../../types/article.types';
 
 vi.mock('../../hooks/useArticles');
 vi.mock('./ArticleCard', () => ({
-    default: ({ article }: any) => <div data-testid="article-card">{article.title}</div>
+    default: ({ article }: { article: { title: string } }) => <div data-testid="article-card">{article.title}</div>
 }));
 
 describe('ArticleList Component', () => {
     it('shows loading state', () => {
-        (useArticles as any).mockReturnValue({
+        vi.mocked(useArticles).mockReturnValue({
             articles: [],
             loading: true,
             error: null
@@ -22,7 +22,7 @@ describe('ArticleList Component', () => {
     });
 
     it('shows error state', () => {
-        (useArticles as any).mockReturnValue({
+        vi.mocked(useArticles).mockReturnValue({
             articles: [],
             loading: false,
             error: 'Network Error'
@@ -38,7 +38,7 @@ describe('ArticleList Component', () => {
             { id: '2', title: 'Article 2', status: ArticleStatus.VALIDATED, description: 'desc2', price: 20, category: 'cat2', sellerId: 's2', createdAt: new Date() }
         ];
 
-        (useArticles as any).mockReturnValue({
+        vi.mocked(useArticles).mockReturnValue({
             articles: mockArticles,
             loading: false,
             error: null

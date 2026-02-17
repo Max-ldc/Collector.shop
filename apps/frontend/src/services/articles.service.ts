@@ -43,9 +43,8 @@ export const validateArticle = async (articleId: string): Promise<Article> => {
   return response.data;
 };
 
-export const rejectArticle = async (articleId: string): Promise<Article> => {
-  const response = await axios.delete(`${API_URL}/reject/${articleId}`);
-  return response.data;
+export const rejectArticle = async (articleId: string): Promise<void> => {
+  await axios.delete(`${API_URL}/${articleId}`);
 };
 
 export const articlesService = {

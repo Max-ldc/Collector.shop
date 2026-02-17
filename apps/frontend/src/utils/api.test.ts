@@ -1,5 +1,4 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import axios from 'axios';
 import { get, post, put, del } from './api';
 
 const { mockAxiosInstance } = vi.hoisted(() => {

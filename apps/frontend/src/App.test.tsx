@@ -1,7 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
-import App from './App';
-import { BrowserRouter } from 'react-router-dom';
+import './App';
 
 // Mock Keycloak and AuthProvider to avoid complex async setup in tests
 vi.mock('./providers/AuthProvider', () => ({

@@ -8,7 +8,7 @@ vi.mock('../../hooks/useAuth');
 describe('Login Component', () => {
     it('renders login button', () => {
         const loginMock = vi.fn();
-        (useAuth as any).mockReturnValue({ login: loginMock });
+        vi.mocked(useAuth).mockReturnValue({ login: loginMock });
 
         render(<Login />);
         expect(screen.getByText('Login with Keycloak')).toBeInTheDocument();
@@ -16,7 +16,7 @@ describe('Login Component', () => {
 
     it('calls login on click', () => {
         const loginMock = vi.fn();
-        (useAuth as any).mockReturnValue({ login: loginMock });
+        vi.mocked(useAuth).mockReturnValue({ login: loginMock });
 
         render(<Login />);
         fireEvent.click(screen.getByText('Login with Keycloak'));

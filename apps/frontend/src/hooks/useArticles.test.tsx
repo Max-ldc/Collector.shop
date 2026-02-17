@@ -11,7 +11,7 @@ describe('useArticles Hook', () => {
     });
 
     it('fetches articles initially', async () => {
-        (fetchValidatedArticles as any).mockResolvedValue([
+        vi.mocked(fetchValidatedArticles).mockResolvedValue([
             { id: '1', title: 'Test', status: 'validated', description: 'desc', price: 10, category: 'cat', sellerId: 's1' }
         ]);
 
@@ -28,7 +28,7 @@ describe('useArticles Hook', () => {
     });
 
     it('handles fetch errors', async () => {
-        (fetchValidatedArticles as any).mockRejectedValue(new Error('Network Error'));
+        vi.mocked(fetchValidatedArticles).mockRejectedValue(new Error('Network Error'));
 
         const { result } = renderHook(() => useArticles());
 

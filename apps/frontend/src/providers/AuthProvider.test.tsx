@@ -2,7 +2,6 @@ import React from 'react';
 import { render, screen, waitFor, act } from '@testing-library/react';
 import { AuthProvider, useAuthContext } from './AuthProvider';
 import keycloakInstance from '../keycloak';
-import { check } from 'prettier';
 import { describe, it, expect, vi, beforeEach, Mock } from 'vitest';
 
 // Mock Keycloak instance
@@ -39,14 +38,14 @@ describe('AuthProvider', () => {
     beforeEach(() => {
         vi.clearAllMocks();
         // Reset properties on the mocked instance
-        (keycloakInstance as any).authenticated = undefined;
-        (keycloakInstance as any).tokenParsed = undefined;
+        (keycloakInstance as unknown as Record<string, unknown>).authenticated = undefined;
+        (keycloakInstance as unknown as Record<string, unknown>).tokenParsed = undefined;
     });
 
     it('should initialize keycloak and update state on success', async () => {
         (keycloakInstance.init as Mock).mockResolvedValue(true);
         // Restore tokenParsed for this test
-        (keycloakInstance as any).tokenParsed = {
+        (keycloakInstance as unknown as Record<string, unknown>).tokenParsed = {
             realm_access: {
                 roles: ['user', 'admin']
             }

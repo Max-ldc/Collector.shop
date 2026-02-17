@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { renderHook } from '@testing-library/react';
 import useAuth from './useAuth';
-import { AuthProvider, useAuthContext } from '../providers/AuthProvider';
+import { useAuthContext } from '../providers/AuthProvider';
 
 // Mock the context hook
 vi.mock('../providers/AuthProvider', async () => {
@@ -21,7 +21,7 @@ describe('useAuth Hook', () => {
             login: vi.fn(),
             logout: vi.fn(),
         };
-        (useAuthContext as any).mockReturnValue(mockContext);
+        (useAuthContext as ReturnType<typeof vi.fn>).mockReturnValue(mockContext);
 
         const { result } = renderHook(() => useAuth());
 
@@ -37,7 +37,7 @@ describe('useAuth Hook', () => {
             login: vi.fn(),
             logout: vi.fn(),
         };
-        (useAuthContext as any).mockReturnValue(mockContext);
+        (useAuthContext as ReturnType<typeof vi.fn>).mockReturnValue(mockContext);
 
         const { result } = renderHook(() => useAuth());
 

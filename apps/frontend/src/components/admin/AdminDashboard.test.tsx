@@ -44,8 +44,8 @@ describe('AdminDashboard', () => {
     });
 
     it('should render the dashboard structure and empty states', async () => {
-        (articlesService.fetchPendingArticles as any).mockResolvedValue([]);
-        (articlesService.fetchValidatedArticles as any).mockResolvedValue([]);
+        vi.mocked(articlesService.fetchPendingArticles).mockResolvedValue([]);
+        vi.mocked(articlesService.fetchValidatedArticles).mockResolvedValue([]);
 
         render(
             <BrowserRouter>
@@ -62,8 +62,8 @@ describe('AdminDashboard', () => {
     });
 
     it('should display fetched articles', async () => {
-        (articlesService.fetchPendingArticles as any).mockResolvedValue([mockPendingArticle]);
-        (articlesService.fetchValidatedArticles as any).mockResolvedValue([mockValidatedArticle]);
+        vi.mocked(articlesService.fetchPendingArticles).mockResolvedValue([mockPendingArticle]);
+        vi.mocked(articlesService.fetchValidatedArticles).mockResolvedValue([mockValidatedArticle]);
 
         render(
             <BrowserRouter>
@@ -78,9 +78,9 @@ describe('AdminDashboard', () => {
     });
 
     it('should validate an article', async () => {
-        (articlesService.fetchPendingArticles as any).mockResolvedValue([mockPendingArticle]);
-        (articlesService.fetchValidatedArticles as any).mockResolvedValue([]);
-        (articlesService.validateArticle as any).mockResolvedValue({ ...mockPendingArticle, status: ArticleStatus.VALIDATED });
+        vi.mocked(articlesService.fetchPendingArticles).mockResolvedValue([mockPendingArticle]);
+        vi.mocked(articlesService.fetchValidatedArticles).mockResolvedValue([]);
+        vi.mocked(articlesService.validateArticle).mockResolvedValue({ ...mockPendingArticle, status: ArticleStatus.VALIDATED });
 
         render(
             <BrowserRouter>
@@ -102,9 +102,9 @@ describe('AdminDashboard', () => {
     });
 
     it('should reject an article', async () => {
-        (articlesService.fetchPendingArticles as any).mockResolvedValue([mockPendingArticle]);
-        (articlesService.fetchValidatedArticles as any).mockResolvedValue([]);
-        (articlesService.rejectArticle as any).mockResolvedValue({ ...mockPendingArticle, status: ArticleStatus.REJECTED });
+        vi.mocked(articlesService.fetchPendingArticles).mockResolvedValue([mockPendingArticle]);
+        vi.mocked(articlesService.fetchValidatedArticles).mockResolvedValue([]);
+        vi.mocked(articlesService.rejectArticle).mockResolvedValue({ ...mockPendingArticle, status: ArticleStatus.REJECTED });
 
         render(
             <BrowserRouter>
@@ -127,8 +127,8 @@ describe('AdminDashboard', () => {
 
     it('should handle load error', async () => {
         const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => { });
-        (articlesService.fetchPendingArticles as any).mockRejectedValue(new Error('Fetch failed'));
-        (articlesService.fetchValidatedArticles as any).mockResolvedValue([]);
+        vi.mocked(articlesService.fetchPendingArticles).mockRejectedValue(new Error('Fetch failed'));
+        vi.mocked(articlesService.fetchValidatedArticles).mockResolvedValue([]);
 
         render(
             <BrowserRouter>

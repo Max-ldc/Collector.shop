@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, beforeAll } from 'vitest';
+import { describe, it, expect, vi, beforeEach, beforeAll, Mock } from 'vitest';
 import articlesService from './articles.service';
 import axios from 'axios';
 import keycloak from '../keycloak';
@@ -33,11 +33,11 @@ vi.mock('../keycloak', () => {
 });
 
 describe('Articles Service', () => {
-    let interceptorCallback: any;
+    let interceptorCallback: ((config: Record<string, Record<string, string>>) => Promise<void>) | undefined;
 
     beforeAll(() => {
         // Capture the interceptor callback that was registered when the module was imported
-        const calls = (axios.interceptors.request.use as any).mock.calls;
+        const calls = (axios.interceptors.request.use as Mock).mock.calls;
         if (calls && calls.length > 0) {
             interceptorCallback = calls[0][0];
         }
@@ -63,7 +63,7 @@ describe('Articles Service', () => {
 
     describe('API Calls', () => {
         it('fetches validated articles', async () => {
-            (axios.get as any).mockResolvedValue({ data: mockArticles });
+            vi.mocked(axios.get).mockResolvedValue({ data: mockArticles });
 
             const result = await articlesService.fetchValidatedArticles();
 
@@ -73,7 +73,7 @@ describe('Articles Service', () => {
 
         it('submits a new article', async () => {
             const newArticle = mockArticles[0];
-            (axios.post as any).mockResolvedValue({ data: newArticle });
+            vi.mocked(axios.post).mockResolvedValue({ data: newArticle });
 
             const result = await articlesService.submitArticle(newArticle);
 
@@ -82,7 +82,7 @@ describe('Articles Service', () => {
         });
 
         it('fetches pending articles', async () => {
-            (axios.get as any).mockResolvedValue({ data: mockArticles });
+            vi.mocked(axios.get).mockResolvedValue({ data: mockArticles });
 
             const result = await articlesService.fetchPendingArticles();
 
@@ -92,7 +92,7 @@ describe('Articles Service', () => {
 
         it('validates an article', async () => {
             const article = { ...mockArticles[0], status: ArticleStatus.VALIDATED };
-            (axios.patch as any).mockResolvedValue({ data: article });
+            vi.mocked(axios.patch).mockResolvedValue({ data: article });
 
             const result = await articlesService.validateArticle('1');
 
@@ -101,13 +101,11 @@ describe('Articles Service', () => {
         });
 
         it('rejects an article', async () => {
-            const article = { ...mockArticles[0], status: ArticleStatus.REJECTED };
-            (axios.delete as any).mockResolvedValue({ data: article });
+            vi.mocked(axios.delete).mockResolvedValue({ status: 204 });
 
-            const result = await articlesService.rejectArticle('1');
+            await articlesService.rejectArticle('1');
 
-            expect(axios.delete).toHaveBeenCalledWith(expect.stringMatching(/\/articles\/reject\/1$/));
-            expect(result).toEqual(article);
+            expect(axios.delete).toHaveBeenCalledWith(expect.stringMatching(/\/articles\/1$/));
         });
     });
 
@@ -115,13 +113,13 @@ describe('Articles Service', () => {
         it('should add authorization header if authenticated', async () => {
             if (!interceptorCallback) {
                 // If it wasn't captured before mocks were cleared, this means something went wrong with init
-                const calls = (axios.interceptors.request.use as any).mock.calls;
+                const calls = (axios.interceptors.request.use as Mock).mock.calls;
                 if (calls && calls.length > 0) interceptorCallback = calls[0][0];
             }
 
             keycloak.authenticated = true;
             keycloak.token = 'test-token';
-            (keycloak.updateToken as any).mockResolvedValue(true);
+            vi.mocked(keycloak.updateToken).mockResolvedValue(true);
 
             const config = { headers: {} };
 
@@ -146,7 +144,7 @@ describe('Articles Service', () => {
 
         it('should login if token refresh fails', async () => {
             keycloak.authenticated = true;
-            (keycloak.updateToken as any).mockRejectedValue(new Error('Refresh failed'));
+            vi.mocked(keycloak.updateToken).mockRejectedValue(new Error('Refresh failed'));
 
             const config = { headers: {} };
 

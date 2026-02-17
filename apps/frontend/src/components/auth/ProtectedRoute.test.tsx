@@ -9,7 +9,7 @@ vi.mock('../../hooks/useAuth');
 
 describe('ProtectedRoute', () => {
     it('shows loading state when not initialized', () => {
-        (useAuth as any).mockReturnValue({
+        vi.mocked(useAuth).mockReturnValue({
             isAuthenticated: false,
             initialized: false,
             userRoles: []
@@ -25,7 +25,7 @@ describe('ProtectedRoute', () => {
     });
 
     it('redirects to login if not authenticated', () => {
-        (useAuth as any).mockReturnValue({
+        vi.mocked(useAuth).mockReturnValue({
             isAuthenticated: false,
             initialized: true,
             userRoles: []
@@ -44,7 +44,7 @@ describe('ProtectedRoute', () => {
     });
 
     it('redirects to home if role is missing', () => {
-        (useAuth as any).mockReturnValue({
+        vi.mocked(useAuth).mockReturnValue({
             isAuthenticated: true,
             initialized: true,
             userRoles: ['user']
@@ -63,7 +63,7 @@ describe('ProtectedRoute', () => {
     });
 
     it('renders children if authenticated and authorized', () => {
-        (useAuth as any).mockReturnValue({
+        vi.mocked(useAuth).mockReturnValue({
             isAuthenticated: true,
             initialized: true,
             userRoles: ['admin']
