@@ -1,0 +1,52 @@
+name: E2E Functional Test (Manual)
+
+on:
+  # Déclenchement manuel uniquement (le test E2E est intégré dans le pipeline CI/CD)
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+env:
+  BASE_URL: ${{ secrets.LOAD_TEST_BASE_URL }}
+  KEYCLOAK_URL: ${{ secrets.KEYCLOAK_URL }}
+  KC_REALM: ${{ secrets.KEYCLOAK_REALM }}
+  KC_CLIENT_ID: ${{ secrets.KEYCLOAK_CLIENT_ID }}
+
+jobs:
+  e2e-functional-test:
+    name: E2E Functional Test (manual)
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install k6
+        run: |
+          K6_VERSION="v1.6.1"
+          curl -fsSL -o /tmp/k6.deb "https://github.com/grafana/k6/releases/download/${K6_VERSION}/k6-${K6_VERSION}-linux-amd64.deb"
+          sudo dpkg -i /tmp/k6.deb
+          rm /tmp/k6.deb
+          k6 version
+
+      - name: Run E2E Functional Test
+        run: |
+          mkdir -p e2e-results
+          k6 run tests/e2e-test.js \
+            --env BASE_URL="${{ env.BASE_URL }}" \
+            --env KEYCLOAK_URL="${{ env.KEYCLOAK_URL }}" \
+            --env KC_REALM="${{ env.KC_REALM }}" \
+            --env KC_CLIENT_ID="${{ env.KC_CLIENT_ID }}" \
+            --env SELLER_USERNAME="${{ secrets.E2E_SELLER_USERNAME }}" \
+            --env SELLER_PASSWORD="${{ secrets.E2E_SELLER_PASSWORD }}" \
+            --env ADMIN_USERNAME="${{ secrets.E2E_ADMIN_USERNAME }}" \
+            --env ADMIN_PASSWORD="${{ secrets.E2E_ADMIN_PASSWORD }}"
+
+      - name: Upload E2E Test Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-test-report-${{ github.run_id }}
+          path: e2e-results/
+          if-no-files-found: warn
+          retention-days: 90
