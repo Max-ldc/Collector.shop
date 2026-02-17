@@ -3,8 +3,10 @@ import {
     Get,
     Post,
     Patch,
+    Delete,
     Body,
     Param,
+    HttpCode,
 } from '@nestjs/common';
 import { ArticlesService } from './articles.service';
 import { CreateArticleDto } from './dto/create-article.dto';
@@ -43,5 +45,13 @@ export class ArticlesController {
     @Public()
     findAllValidated() {
         return this.articlesService.findAllValidated();
+    }
+
+    @Delete(':id')
+    @Roles({ roles: ['realm:ROLE_SELLER', 'realm:ROLE_ADMIN'] })
+    @HttpCode(204)
+    remove(@Param('id') id: string, @AuthenticatedUser() user: any) {
+        const userId = user?.sub || 'anonymous-or-test-user';
+        return this.articlesService.remove(id, userId);
     }
 }

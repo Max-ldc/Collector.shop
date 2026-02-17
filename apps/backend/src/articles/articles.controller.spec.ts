@@ -20,6 +20,7 @@ describe('ArticlesController', () => {
                         validate: jest.fn(),
                         findAllValidated: jest.fn(),
                         findAllPending: jest.fn(),
+                        remove: jest.fn(),
                     },
                 },
             ],
@@ -142,6 +143,41 @@ describe('ArticlesController', () => {
 
             expect(service.findAllValidated).toHaveBeenCalled();
             expect(result).toHaveLength(2);
+        });
+    });
+
+    describe('remove', () => {
+        it('should have correct roles for access control', () => {
+            const rolesMetadata = Reflect.getMetadata(META_ROLES, controller.remove);
+            expect(rolesMetadata).toBeDefined();
+            expect(rolesMetadata.roles).toContain('realm:ROLE_SELLER');
+            expect(rolesMetadata.roles).toContain('realm:ROLE_ADMIN');
+        });
+
+        it('should delete an article with the authenticated user id', async () => {
+            const user = { sub: 'user-123', preferred_username: 'john' };
+
+            service.remove.mockResolvedValue(undefined);
+
+            await controller.remove('uuid-1', user);
+
+            expect(service.remove).toHaveBeenCalledWith('uuid-1', 'user-123');
+        });
+
+        it('should use fallback user id when user.sub is not available', async () => {
+            service.remove.mockResolvedValue(undefined);
+
+            await controller.remove('uuid-1', {});
+
+            expect(service.remove).toHaveBeenCalledWith('uuid-1', 'anonymous-or-test-user');
+        });
+
+        it('should use fallback user id when user is undefined', async () => {
+            service.remove.mockResolvedValue(undefined);
+
+            await controller.remove('uuid-1', undefined);
+
+            expect(service.remove).toHaveBeenCalledWith('uuid-1', 'anonymous-or-test-user');
         });
     });
 });

@@ -23,6 +23,7 @@ describe('ArticlesService', () => {
                         save: jest.fn(),
                         find: jest.fn(),
                         findOne: jest.fn(),
+                        remove: jest.fn(),
                     },
                 },
                 {
@@ -178,6 +179,35 @@ describe('ArticlesService', () => {
                 where: { status: ArticleStatus.PENDING },
             });
             expect(result).toHaveLength(1);
+        });
+    });
+
+    describe('remove', () => {
+        it('should remove an existing article', async () => {
+            const article = {
+                id: 'uuid-1',
+                title: 'Test',
+                description: 'desc',
+                price: 10,
+                category: 'Cat',
+                status: ArticleStatus.PENDING,
+                isFlagged: false,
+                sellerId: 'user-1',
+            } as Article;
+
+            repository.findOne.mockResolvedValue(article);
+            repository.remove.mockResolvedValue(article);
+
+            await service.remove('uuid-1', 'user-1');
+
+            expect(repository.findOne).toHaveBeenCalledWith({ where: { id: 'uuid-1' } });
+            expect(repository.remove).toHaveBeenCalledWith(article);
+        });
+
+        it('should throw NotFoundException when article does not exist', async () => {
+            repository.findOne.mockResolvedValue(null);
+
+            await expect(service.remove('non-existent-id', 'user-1')).rejects.toThrow(NotFoundException);
         });
     });
 });
