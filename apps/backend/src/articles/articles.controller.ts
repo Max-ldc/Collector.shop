@@ -18,7 +18,10 @@ export class ArticlesController {
 
     @Post()
     @Roles({ roles: ['realm:ROLE_SELLER', 'realm:ROLE_ADMIN'] })
-    create(@Body() createArticleDto: CreateArticleDto, @AuthenticatedUser() user: any) {
+    create(
+        @Body() createArticleDto: CreateArticleDto,
+        @AuthenticatedUser() user: any,
+    ) {
         console.log('--- ENTERING CONTROLLER ---');
         console.log('User:', user);
         console.log('Payload:', createArticleDto);
@@ -50,8 +53,7 @@ export class ArticlesController {
     @Delete(':id')
     @Roles({ roles: ['realm:ROLE_SELLER', 'realm:ROLE_ADMIN'] })
     @HttpCode(204)
-    remove(@Param('id') id: string, @AuthenticatedUser() user: any) {
-        const userId = user?.sub || 'anonymous-or-test-user';
-        return this.articlesService.remove(id, userId);
+    remove(@Param('id') id: string) {
+        return this.articlesService.remove(id);
     }
 }

@@ -13,7 +13,10 @@ export class ArticlesService {
         private readonly contentAnalyzerService: ContentAnalyzerService,
     ) { }
 
-    async create(createArticleDto: CreateArticleDto, sellerId: string): Promise<Article> {
+    async create(
+        createArticleDto: CreateArticleDto,
+        sellerId: string,
+    ): Promise<Article> {
         const isSuspicious = this.contentAnalyzerService.containsRestrictedContent(
             createArticleDto.description,
         );
@@ -50,7 +53,7 @@ export class ArticlesService {
         });
     }
 
-    async remove(id: string, sellerId: string): Promise<void> {
+    async remove(id: string): Promise<void> {
         const article = await this.articleRepository.findOne({ where: { id } });
         if (!article) {
             throw new NotFoundException(`Article with ID ${id} not found`);

@@ -1,6 +1,10 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { ValidationPipe, BadRequestException, Logger as NestLogger } from '@nestjs/common';
+import {
+  ValidationPipe,
+  BadRequestException,
+  Logger as NestLogger,
+} from '@nestjs/common';
 import { Logger } from 'nestjs-pino';
 
 async function bootstrap() {

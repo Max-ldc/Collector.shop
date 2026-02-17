@@ -1,6 +1,16 @@
-import { Module, MiddlewareConsumer, RequestMethod, NestModule } from '@nestjs/common';
+import {
+  Module,
+  MiddlewareConsumer,
+  RequestMethod,
+  NestModule,
+} from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { KeycloakConnectModule, AuthGuard, RoleGuard, TokenValidation, ResourceGuard } from 'nest-keycloak-connect';
+import {
+  KeycloakConnectModule,
+  AuthGuard,
+  RoleGuard,
+  TokenValidation,
+} from 'nest-keycloak-connect';
 import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -19,9 +29,10 @@ import { CustomPrometheusController } from './observability/prometheus.controlle
     LoggerModule.forRoot({
       pinoHttp: {
         level: process.env.NODE_ENV === 'production' ? 'info' : 'debug',
-        transport: process.env.NODE_ENV !== 'production'
-          ? { target: 'pino-pretty' }
-          : undefined,
+        transport:
+          process.env.NODE_ENV !== 'production'
+            ? { target: 'pino-pretty' }
+            : undefined,
         // Azure Log Analytics compatibility
         formatters: {
           level: (label) => {
@@ -46,7 +57,10 @@ import { CustomPrometheusController } from './observability/prometheus.controlle
       database: process.env.DATABASE_NAME || 'collector_db',
       entities: [__dirname + '/**/*.entity{.ts,.js}'],
       synchronize: process.env.NODE_ENV !== 'production', // Set to false in production
-      ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+      ssl:
+        process.env.NODE_ENV === 'production'
+          ? { rejectUnauthorized: false }
+          : false,
     }),
     KeycloakConnectModule.register({
       authServerUrl: process.env.KEYCLOAK_URL,
@@ -100,7 +114,9 @@ export class AppModule implements NestModule {
       .apply((req, res, next) => {
         console.log(`[RequestLogger] ${req.method} ${req.originalUrl}`);
         if (req.headers.authorization) {
-          console.log(`[RequestLogger] Authorization Header: ${req.headers.authorization}`);
+          console.log(
+            `[RequestLogger] Authorization Header: ${req.headers.authorization}`,
+          );
         } else {
           console.log('[RequestLogger] Authorization Header: MISSING');
         }
