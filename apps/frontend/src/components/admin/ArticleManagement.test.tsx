@@ -57,7 +57,7 @@ describe('ArticleManagement', () => {
     });
 
     it('should reject an article', async () => {
-        (rejectArticle as Mock).mockResolvedValue({ ...mockPending[1], status: 'rejected' });
+        (rejectArticle as Mock).mockResolvedValue(undefined);
 
         render(<ArticleManagement />);
 

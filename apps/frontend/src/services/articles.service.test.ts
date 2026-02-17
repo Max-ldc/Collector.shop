@@ -101,13 +101,11 @@ describe('Articles Service', () => {
         });
 
         it('rejects an article', async () => {
-            const article = { ...mockArticles[0], status: ArticleStatus.REJECTED };
-            (axios.delete as any).mockResolvedValue({ data: article });
+            (axios.delete as any).mockResolvedValue({ status: 204 });
 
-            const result = await articlesService.rejectArticle('1');
+            await articlesService.rejectArticle('1');
 
-            expect(axios.delete).toHaveBeenCalledWith(expect.stringMatching(/\/articles\/reject\/1$/));
-            expect(result).toEqual(article);
+            expect(axios.delete).toHaveBeenCalledWith(expect.stringMatching(/\/articles\/1$/));
         });
     });
 

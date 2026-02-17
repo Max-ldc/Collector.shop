@@ -73,14 +73,14 @@ jobs:
         continue-on-error: true
         run: |
           cd apps/backend
-          npm install --ignore-scripts
+          npm ci --ignore-scripts
           npm audit --audit-level=critical
 
       - name: Audit Frontend
         continue-on-error: true
         run: |
           cd apps/frontend
-          npm install --ignore-scripts
+          npm ci --ignore-scripts
           npm audit --audit-level=critical
 
   build-test:
@@ -103,7 +103,7 @@ jobs:
       - name: Install & Test Backend
         run: |
           cd apps/backend
-          npm install
+          npm ci
           npm run lint
           npm run test:cov
           npm run build
@@ -111,7 +111,7 @@ jobs:
       - name: Install & Test Frontend
         run: |
           cd apps/frontend
-          npm install
+          npm ci
           npm run lint
           npm run test:cov
           npm run build
