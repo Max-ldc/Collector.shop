@@ -218,17 +218,22 @@ export default function (data) {
         });
 
         // ──────────────────────────────────────────────────────
-        // Step 5 : Supprimer l'article (nettoyage)
+        // Step 5 : Supprimer l'article (admin — l'article validé
+        //          peut nécessiter des droits admin pour le DELETE)
         // ──────────────────────────────────────────────────────
-        console.log('\n🗑️  Step 5 — DELETE /articles/:id (seller)');
+        console.log('\n🗑️  Step 5 — DELETE /articles/:id (admin)');
 
         const deleteRes = http.del(`${BASE_URL}/articles/${articleId}`, null, {
-            headers: { Authorization: `Bearer ${sellerToken}` },
+            headers: { Authorization: `Bearer ${adminToken}` },
         });
 
-        check(deleteRes, {
+        const deleteOk = check(deleteRes, {
             'Step 5 – DELETE /articles/:id → 200 or 204': (r) => r.status === 200 || r.status === 204,
         });
+
+        if (!deleteOk) {
+            console.error(`   ❌ DELETE failed: status=${deleteRes.status}, body=${deleteRes.body}`);
+        }
 
         // ──────────────────────────────────────────────────────
         // Step 6 : Vérifier la suppression (public)
