@@ -1,4 +1,6 @@
+
 FROM node:20-alpine AS builder
+LABEL ci-demo="trigger-frontend-rebuild-20260217"
 
 WORKDIR /app
 

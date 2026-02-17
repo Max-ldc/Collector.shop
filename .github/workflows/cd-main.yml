@@ -112,9 +112,10 @@ jobs:
             -t $FULL_IMAGE_NAME ./apps/frontend
           docker push $FULL_IMAGE_NAME
 
+
   e2e-test:
     name: E2E Functional Test
-    needs: [build-push-backend, build-push-frontend, build-push-observability]
+    needs: [check-changes]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
