@@ -80,7 +80,10 @@ describe('ArticlesController', () => {
 
             await controller.create(dto, {});
 
-            expect(service.create).toHaveBeenCalledWith(dto, 'anonymous-or-test-user');
+            expect(service.create).toHaveBeenCalledWith(
+                dto,
+                'anonymous-or-test-user',
+            );
         });
 
         it('should use fallback user id when user is undefined', async () => {
@@ -95,7 +98,10 @@ describe('ArticlesController', () => {
 
             await controller.create(dto, undefined);
 
-            expect(service.create).toHaveBeenCalledWith(dto, 'anonymous-or-test-user');
+            expect(service.create).toHaveBeenCalledWith(
+                dto,
+                'anonymous-or-test-user',
+            );
         });
     });
 
@@ -154,30 +160,12 @@ describe('ArticlesController', () => {
             expect(rolesMetadata.roles).toContain('realm:ROLE_ADMIN');
         });
 
-        it('should delete an article with the authenticated user id', async () => {
-            const user = { sub: 'user-123', preferred_username: 'john' };
-
+        it('should delete an article by id', async () => {
             service.remove.mockResolvedValue(undefined);
 
-            await controller.remove('uuid-1', user);
+            await controller.remove('uuid-1');
 
-            expect(service.remove).toHaveBeenCalledWith('uuid-1', 'user-123');
-        });
-
-        it('should use fallback user id when user.sub is not available', async () => {
-            service.remove.mockResolvedValue(undefined);
-
-            await controller.remove('uuid-1', {});
-
-            expect(service.remove).toHaveBeenCalledWith('uuid-1', 'anonymous-or-test-user');
-        });
-
-        it('should use fallback user id when user is undefined', async () => {
-            service.remove.mockResolvedValue(undefined);
-
-            await controller.remove('uuid-1', undefined);
-
-            expect(service.remove).toHaveBeenCalledWith('uuid-1', 'anonymous-or-test-user');
+            expect(service.remove).toHaveBeenCalledWith('uuid-1');
         });
     });
 });

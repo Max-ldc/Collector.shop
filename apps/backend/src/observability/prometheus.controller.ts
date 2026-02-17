@@ -5,9 +5,9 @@ import { Public } from 'nest-keycloak-connect';
 
 @Controller('metrics')
 export class CustomPrometheusController extends PrometheusController {
-    @Public()
-    @Get()
-    async index(@Res({ passthrough: true }) response: Response) {
-        return super.index(response);
-    }
+  @Public()
+  @Get()
+  async index(@Res({ passthrough: true }) response: Response) {
+    return super.index(response);
+  }
 }

@@ -64,11 +64,16 @@ describe('ArticlesService', () => {
             } as Article;
 
             repository.create.mockReturnValue(createdArticle);
-            repository.save.mockResolvedValue({ ...createdArticle, id: 'uuid-1' } as Article);
+            repository.save.mockResolvedValue({
+                ...createdArticle,
+                id: 'uuid-1',
+            } as Article);
 
             const result = await service.create(createArticleDto, sellerId);
 
-            expect(contentAnalyzer.containsRestrictedContent).toHaveBeenCalledWith(createArticleDto.description);
+            expect(contentAnalyzer.containsRestrictedContent).toHaveBeenCalledWith(
+                createArticleDto.description,
+            );
             expect(repository.create).toHaveBeenCalledWith({
                 ...createArticleDto,
                 sellerId,
@@ -95,11 +100,16 @@ describe('ArticlesService', () => {
             } as Article;
 
             repository.create.mockReturnValue(flaggedArticle);
-            repository.save.mockResolvedValue({ ...flaggedArticle, id: 'uuid-2' } as Article);
+            repository.save.mockResolvedValue({
+                ...flaggedArticle,
+                id: 'uuid-2',
+            } as Article);
 
             const result = await service.create(dtoWithEmail, sellerId);
 
-            expect(contentAnalyzer.containsRestrictedContent).toHaveBeenCalledWith(dtoWithEmail.description);
+            expect(contentAnalyzer.containsRestrictedContent).toHaveBeenCalledWith(
+                dtoWithEmail.description,
+            );
             expect(repository.create).toHaveBeenCalledWith({
                 ...dtoWithEmail,
                 sellerId,
@@ -124,18 +134,25 @@ describe('ArticlesService', () => {
             } as Article;
 
             repository.findOne.mockResolvedValue(article);
-            repository.save.mockResolvedValue({ ...article, status: ArticleStatus.VALIDATED } as Article);
+            repository.save.mockResolvedValue({
+                ...article,
+                status: ArticleStatus.VALIDATED,
+            } as Article);
 
             const result = await service.validate('uuid-1');
 
-            expect(repository.findOne).toHaveBeenCalledWith({ where: { id: 'uuid-1' } });
+            expect(repository.findOne).toHaveBeenCalledWith({
+                where: { id: 'uuid-1' },
+            });
             expect(result.status).toBe(ArticleStatus.VALIDATED);
         });
 
         it('should throw NotFoundException when article does not exist', async () => {
             repository.findOne.mockResolvedValue(null);
 
-            await expect(service.validate('non-existent-id')).rejects.toThrow(NotFoundException);
+            await expect(service.validate('non-existent-id')).rejects.toThrow(
+                NotFoundException,
+            );
         });
     });
 
@@ -198,16 +215,20 @@ describe('ArticlesService', () => {
             repository.findOne.mockResolvedValue(article);
             repository.remove.mockResolvedValue(article);
 
-            await service.remove('uuid-1', 'user-1');
+            await service.remove('uuid-1');
 
-            expect(repository.findOne).toHaveBeenCalledWith({ where: { id: 'uuid-1' } });
+            expect(repository.findOne).toHaveBeenCalledWith({
+                where: { id: 'uuid-1' },
+            });
             expect(repository.remove).toHaveBeenCalledWith(article);
         });
 
         it('should throw NotFoundException when article does not exist', async () => {
             repository.findOne.mockResolvedValue(null);
 
-            await expect(service.remove('non-existent-id', 'user-1')).rejects.toThrow(NotFoundException);
+            await expect(service.remove('non-existent-id')).rejects.toThrow(
+                NotFoundException,
+            );
         });
     });
 });

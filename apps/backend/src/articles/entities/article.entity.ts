@@ -1,45 +1,51 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 
 export enum ArticleStatus {
-    DRAFT = 'DRAFT',
-    PENDING = 'PENDING',
-    VALIDATED = 'VALIDATED',
-    REJECTED = 'REJECTED',
+  DRAFT = 'DRAFT',
+  PENDING = 'PENDING',
+  VALIDATED = 'VALIDATED',
+  REJECTED = 'REJECTED',
 }
 
 @Entity()
 export class Article {
-    @PrimaryGeneratedColumn('uuid')
-    id: string;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
-    @Column()
-    title: string;
+  @Column()
+  title: string;
 
-    @Column('text')
-    description: string;
+  @Column('text')
+  description: string;
 
-    @Column('decimal')
-    price: number;
+  @Column('decimal')
+  price: number;
 
-    @Column()
-    category: string;
+  @Column()
+  category: string;
 
-    @Column({
-        type: 'enum',
-        enum: ArticleStatus,
-        default: ArticleStatus.PENDING,
-    })
-    status: ArticleStatus;
+  @Column({
+    type: 'enum',
+    enum: ArticleStatus,
+    default: ArticleStatus.PENDING,
+  })
+  status: ArticleStatus;
 
-    @Column({ default: false })
-    isFlagged: boolean;
+  @Column({ default: false })
+  isFlagged: boolean;
 
-    @Column()
-    sellerId: string;
+  @Column()
+  sellerId: string;
 
-    @CreateDateColumn()
-    createdAt: Date;
+  @CreateDateColumn()
+  createdAt: Date;
 
-    @UpdateDateColumn()
-    updatedAt: Date;
+  @UpdateDateColumn()
+  updatedAt: Date;
 }

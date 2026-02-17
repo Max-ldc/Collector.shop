@@ -6,8 +6,8 @@ import { Article } from './entities/article.entity';
 import { ContentAnalyzerService } from '../shared/security/content-analyzer.service';
 
 @Module({
-    imports: [TypeOrmModule.forFeature([Article])],
-    controllers: [ArticlesController],
-    providers: [ArticlesService, ContentAnalyzerService],
+  imports: [TypeOrmModule.forFeature([Article])],
+  controllers: [ArticlesController],
+  providers: [ArticlesService, ContentAnalyzerService],
 })
-export class ArticlesModule { }
+export class ArticlesModule {}
