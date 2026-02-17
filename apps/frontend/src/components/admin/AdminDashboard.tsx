@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Article } from '../../types/article.types';
+import { Article, ArticleStatus } from '../../types/article.types';
 import { fetchValidatedArticles, fetchPendingArticles, validateArticle, rejectArticle } from '../../services/articles.service';
 
 const AdminDashboard: React.FC = () => {
@@ -26,7 +26,7 @@ const AdminDashboard: React.FC = () => {
             await validateArticle(articleId);
             const articleToMove = pendingArticles.find(article => article.id === articleId);
             if (articleToMove) {
-                setValidatedArticles([...validatedArticles, { ...articleToMove, status: 'validated' } as any]);
+                setValidatedArticles([...validatedArticles, { ...articleToMove, status: ArticleStatus.VALIDATED }]);
                 setPendingArticles(pendingArticles.filter(article => article.id !== articleId));
             }
         } catch (error) {

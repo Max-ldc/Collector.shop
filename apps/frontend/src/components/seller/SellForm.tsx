@@ -37,7 +37,7 @@ const SellForm: React.FC = () => {
             setDescription('');
             setPrice('');
             setCategory('');
-        } catch (err: any) {
+        } catch (err: unknown) {
             console.error(err);
             setError('Échec lors de la soumission de l\'article. Veuillez réessayer.');
         }
