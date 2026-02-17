@@ -103,12 +103,7 @@ export function setup() {
 }
 
 // ---------------------------------------------------------------------------
-// Stockage des IDs d'articles créés (pour nettoyage en teardown)
-// ---------------------------------------------------------------------------
-const createdArticleIds = [];
-
-// ---------------------------------------------------------------------------
-// Scénario principal – POST /articles
+// Scénario principal – POST /articles + DELETE (nettoyage immédiat)
 // ---------------------------------------------------------------------------
 export default function (data) {
     const payload = generateArticlePayload();
@@ -130,10 +125,17 @@ export default function (data) {
         },
     });
 
-    // Collecter l'ID pour suppression en teardown
+    // Nettoyage immédiat : chaque VU supprime l'article qu'il vient de créer
     if (success) {
         try {
-            createdArticleIds.push(res.json('id'));
+            const articleId = res.json('id');
+            const delRes = http.del(`${BASE_URL}/articles/${articleId}`, null, {
+                headers: { 'Authorization': `Bearer ${data.accessToken}` },
+                tags: { type: 'cleanup' },
+            });
+            check(delRes, {
+                'DELETE /articles – status 204': (r) => r.status === 204,
+            });
         } catch (_) { /* ignore */ }
     }
 
@@ -157,32 +159,10 @@ export function handleSummary(data) {
 }
 
 // ---------------------------------------------------------------------------
-// Teardown – Suppression des articles créés pendant le test
+// Teardown – Résumé post-test
 // ---------------------------------------------------------------------------
 export function teardown(data) {
-    const total = createdArticleIds.length;
-    console.log(`\n🧹 Nettoyage : ${total} article(s) à supprimer...`);
-
-    const params = {
-        headers: {
-            'Authorization': `Bearer ${data.accessToken}`,
-        },
-        tags: { type: 'cleanup' },
-    };
-
-    let deleted = 0;
-    let errors = 0;
-
-    for (const id of createdArticleIds) {
-        const res = http.del(`${BASE_URL}/articles/${id}`, null, params);
-        if (res.status === 204) {
-            deleted++;
-        } else {
-            errors++;
-        }
-    }
-
-    console.log(`✅ ${deleted} article(s) supprimé(s), ${errors} erreur(s).`);
     console.log('🏁 Test de charge terminé.');
+    console.log('   Les articles créés ont été supprimés par chaque VU après création.');
     console.log('   Vérifiez les métriques Grafana / Prometheus pour l\'analyse complète.');
 }
