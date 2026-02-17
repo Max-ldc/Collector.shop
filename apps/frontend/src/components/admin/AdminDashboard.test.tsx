@@ -104,7 +104,7 @@ describe('AdminDashboard', () => {
     it('should reject an article', async () => {
         vi.mocked(articlesService.fetchPendingArticles).mockResolvedValue([mockPendingArticle]);
         vi.mocked(articlesService.fetchValidatedArticles).mockResolvedValue([]);
-        vi.mocked(articlesService.rejectArticle).mockResolvedValue({ ...mockPendingArticle, status: ArticleStatus.REJECTED });
+        vi.mocked(articlesService.rejectArticle).mockResolvedValue(undefined);
 
         render(
             <BrowserRouter>
@@ -122,6 +122,40 @@ describe('AdminDashboard', () => {
         await waitFor(() => {
             expect(articlesService.rejectArticle).toHaveBeenCalledWith('pending-1');
             expect(screen.queryByText('Pending Article')).not.toBeInTheDocument();
+        });
+    });
+
+    it('should paginate pending articles', async () => {
+        const manyArticles: Article[] = Array.from({ length: 15 }, (_, i) => ({
+            ...mockPendingArticle,
+            id: `pending-${i + 1}`,
+            title: `Article ${i + 1}`,
+        }));
+        vi.mocked(articlesService.fetchPendingArticles).mockResolvedValue(manyArticles);
+        vi.mocked(articlesService.fetchValidatedArticles).mockResolvedValue([]);
+
+        render(
+            <BrowserRouter>
+                <AdminDashboard />
+            </BrowserRouter>
+        );
+
+        await waitFor(() => {
+            expect(screen.getByText('Article 1')).toBeInTheDocument();
+            expect(screen.getByText('Article 12')).toBeInTheDocument();
+        });
+
+        // Articles on page 2 should not be visible
+        expect(screen.queryByText('Article 13')).not.toBeInTheDocument();
+        expect(screen.getByText('Page 1 / 2')).toBeInTheDocument();
+
+        // Navigate to page 2
+        fireEvent.click(screen.getByText('Suivant →'));
+
+        await waitFor(() => {
+            expect(screen.getByText('Article 13')).toBeInTheDocument();
+            expect(screen.queryByText('Article 1')).not.toBeInTheDocument();
+            expect(screen.getByText('Page 2 / 2')).toBeInTheDocument();
         });
     });
 
