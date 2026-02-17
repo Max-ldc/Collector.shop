@@ -1,0 +1,149 @@
+name: CD Main Branch
+
+on:
+  push:
+    branches: [ "main" ]
+
+permissions:
+  contents: read
+
+jobs:
+  check-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      backend: ${{ steps.filter.outputs.backend }}
+      frontend: ${{ steps.filter.outputs.frontend }}
+      observability: ${{ steps.filter.outputs.observability }}
+      infrastructure: ${{ steps.filter.outputs.infrastructure }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            backend:
+              - 'apps/backend/**'
+            frontend:
+              - 'apps/frontend/**'
+            observability:
+              - 'apps/observability/**'
+            infrastructure:
+              - 'infrastructure/**'
+
+  build-push-observability:
+    name: Build & Push Observability
+    needs: [check-changes]
+    if: needs.check-changes.outputs.observability == 'true'
+    runs-on: ubuntu-latest
+    env:
+      ACR_NAME: acrcollector2659
+      IMAGE_TAG: latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Login to ACR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.ACR_NAME }}.azurecr.io
+          username: ${{ secrets.ACR_USERNAME }}
+          password: ${{ secrets.ACR_PASSWORD }}
+      - name: Build Prometheus
+        run: |
+          FULL_IMAGE_NAME="${{ env.ACR_NAME }}.azurecr.io/prometheus-custom:${{ env.IMAGE_TAG }}"
+          docker build -t $FULL_IMAGE_NAME -f apps/observability/Dockerfile.prometheus apps/observability/
+          docker push $FULL_IMAGE_NAME
+      - name: Build Grafana
+        run: |
+          FULL_IMAGE_NAME="${{ env.ACR_NAME }}.azurecr.io/grafana-custom:${{ env.IMAGE_TAG }}"
+          docker build -t $FULL_IMAGE_NAME -f apps/observability/Dockerfile.grafana apps/observability/
+          docker push $FULL_IMAGE_NAME
+
+  build-push-backend:
+    name: Build & Push Backend
+    needs: [check-changes]
+    if: needs.check-changes.outputs.backend == 'true'
+    runs-on: ubuntu-latest
+    env:
+      ACR_NAME: acrcollector2659
+      IMAGE_TAG: latest
+      BACKEND_APP_NAME: collector-backend
+    steps:
+      - uses: actions/checkout@v4
+      - name: Login to ACR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.ACR_NAME }}.azurecr.io
+          username: ${{ secrets.ACR_USERNAME }}
+          password: ${{ secrets.ACR_PASSWORD }}
+      - name: Build & Push Backend
+        run: |
+          FULL_IMAGE_NAME="${{ env.ACR_NAME }}.azurecr.io/${{ env.BACKEND_APP_NAME }}:${{ env.IMAGE_TAG }}"
+          docker build -t $FULL_IMAGE_NAME ./apps/backend
+          docker push $FULL_IMAGE_NAME
+
+  build-push-frontend:
+    name: Build & Push Frontend
+    needs: [check-changes]
+    if: needs.check-changes.outputs.frontend == 'true'
+    runs-on: ubuntu-latest
+    env:
+      ACR_NAME: acrcollector2659
+      IMAGE_TAG: latest
+      FRONTEND_APP_NAME: collector-frontend
+      VITE_API_URL: https://collector-backend.wittyforest-1d08efa7.francecentral.azurecontainerapps.io/api
+      VITE_KEYCLOAK_URL: https://collector-auth.wittyforest-1d08efa7.francecentral.azurecontainerapps.io
+      VITE_KEYCLOAK_REALM: collector-realm
+      VITE_KEYCLOAK_CLIENT_ID: collector-frontend
+    steps:
+      - uses: actions/checkout@v4
+      - name: Login to ACR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.ACR_NAME }}.azurecr.io
+          username: ${{ secrets.ACR_USERNAME }}
+          password: ${{ secrets.ACR_PASSWORD }}
+      - name: Build & Push Frontend
+        run: |
+          FULL_IMAGE_NAME="${{ env.ACR_NAME }}.azurecr.io/${{ env.FRONTEND_APP_NAME }}:${{ env.IMAGE_TAG }}"
+          docker build \
+            --build-arg VITE_API_URL=${{ env.VITE_API_URL }} \
+            --build-arg VITE_KEYCLOAK_URL=${{ env.VITE_KEYCLOAK_URL }} \
+            --build-arg VITE_KEYCLOAK_REALM=${{ env.VITE_KEYCLOAK_REALM }} \
+            --build-arg VITE_KEYCLOAK_CLIENT_ID=${{ env.VITE_KEYCLOAK_CLIENT_ID }} \
+            -t $FULL_IMAGE_NAME ./apps/frontend
+          docker push $FULL_IMAGE_NAME
+
+  e2e-test:
+    name: E2E Functional Test
+    needs: [build-push-backend, build-push-frontend, build-push-observability]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Wait for deployment
+        run: sleep 120
+      - name: Install k6
+        run: |
+          K6_VERSION="v1.6.1"
+          curl -fsSL -o /tmp/k6.deb "https://github.com/grafana/k6/releases/download/${K6_VERSION}/k6-${K6_VERSION}-linux-amd64.deb"
+          sudo dpkg -i /tmp/k6.deb
+          rm /tmp/k6.deb
+          k6 version
+      - name: Run E2E Functional Test
+        run: |
+          mkdir -p e2e-results
+          k6 run tests/e2e-test.js \
+            --env BASE_URL="${{ secrets.LOAD_TEST_BASE_URL }}" \
+            --env KEYCLOAK_URL="${{ secrets.KEYCLOAK_URL }}" \
+            --env KC_REALM="${{ secrets.KEYCLOAK_REALM }}" \
+            --env KC_CLIENT_ID="${{ secrets.KC_CLIENT_ID }}" \
+            --env SELLER_USERNAME="${{ secrets.E2E_SELLER_USERNAME }}" \
+            --env SELLER_PASSWORD="${{ secrets.E2E_SELLER_PASSWORD }}" \
+            --env ADMIN_USERNAME="${{ secrets.E2E_ADMIN_USERNAME }}" \
+            --env ADMIN_PASSWORD="${{ secrets.E2E_ADMIN_PASSWORD }}"
+      - name: Upload E2E Test Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-test-report-${{ github.run_id }}
+          path: e2e-results/
+          if-no-files-found: warn
+          retention-days: 90
