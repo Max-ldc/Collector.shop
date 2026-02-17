@@ -11,6 +11,11 @@ permissions:
   contents: read
   pull-requests: read
 
+# Empêche l'exécution parallèle sur le même runner self-hosted
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
 env:
   DATABASE_HOST: ${{ secrets.DATABASE_HOST }}
   DATABASE_PORT: ${{ secrets.DATABASE_PORT }}
@@ -81,6 +86,7 @@ jobs:
   build-test:
     name: Build & Test
     runs-on: self-hosted
+    needs: [audit]
     steps:
       - uses: actions/checkout@v4
       
