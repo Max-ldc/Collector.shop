@@ -26,8 +26,8 @@ export const options = {
     thresholds: {
         // SLO 1 – 95% des requêtes POST /articles sous 500ms
         'http_req_duration{type:create_article}': ['p(95)<500'],
-        // SLO 2 – Moins de 1% d'erreurs HTTP
-        'http_req_failed': ['rate<0.01'],
+        // SLO 2 – Moins de 1% d'erreurs sur POST /articles (exclut le cleanup DELETE)
+        'http_req_failed{type:create_article}': ['rate<0.01'],
     },
 };
 
