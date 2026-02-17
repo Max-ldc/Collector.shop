@@ -13,7 +13,7 @@ export const useArticles = () => {
             const fetchedArticles = await fetchValidatedArticles();
             setArticles(fetchedArticles);
             setError(null);
-        } catch (_err) {
+        } catch {
             setError('Failed to fetch articles');
         } finally {
             setLoading(false);
