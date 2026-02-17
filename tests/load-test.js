@@ -103,6 +103,11 @@ export function setup() {
 }
 
 // ---------------------------------------------------------------------------
+// Stockage des IDs d'articles créés (pour nettoyage en teardown)
+// ---------------------------------------------------------------------------
+const createdArticleIds = [];
+
+// ---------------------------------------------------------------------------
 // Scénario principal – POST /articles
 // ---------------------------------------------------------------------------
 export default function (data) {
@@ -118,12 +123,19 @@ export default function (data) {
 
     const res = http.post(`${BASE_URL}/articles`, JSON.stringify(payload), params);
 
-    check(res, {
+    const success = check(res, {
         'POST /articles – status 201': (r) => r.status === 201,
         'POST /articles – id retourné': (r) => {
             try { return !!r.json('id'); } catch { return false; }
         },
     });
+
+    // Collecter l'ID pour suppression en teardown
+    if (success) {
+        try {
+            createdArticleIds.push(res.json('id'));
+        } catch (_) { /* ignore */ }
+    }
 
     // Simule un temps de réflexion réaliste entre requêtes (1-3s)
     sleep(randomIntBetween(1, 3));
@@ -145,9 +157,32 @@ export function handleSummary(data) {
 }
 
 // ---------------------------------------------------------------------------
-// Teardown (optionnel – résumé post-test)
+// Teardown – Suppression des articles créés pendant le test
 // ---------------------------------------------------------------------------
 export function teardown(data) {
+    const total = createdArticleIds.length;
+    console.log(`\n🧹 Nettoyage : ${total} article(s) à supprimer...`);
+
+    const params = {
+        headers: {
+            'Authorization': `Bearer ${data.accessToken}`,
+        },
+        tags: { type: 'cleanup' },
+    };
+
+    let deleted = 0;
+    let errors = 0;
+
+    for (const id of createdArticleIds) {
+        const res = http.del(`${BASE_URL}/articles/${id}`, null, params);
+        if (res.status === 204) {
+            deleted++;
+        } else {
+            errors++;
+        }
+    }
+
+    console.log(`✅ ${deleted} article(s) supprimé(s), ${errors} erreur(s).`);
     console.log('🏁 Test de charge terminé.');
     console.log('   Vérifiez les métriques Grafana / Prometheus pour l\'analyse complète.');
 }

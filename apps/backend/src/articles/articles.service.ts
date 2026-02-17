@@ -49,4 +49,12 @@ export class ArticlesService {
             where: { status: ArticleStatus.PENDING },
         });
     }
+
+    async remove(id: string, sellerId: string): Promise<void> {
+        const article = await this.articleRepository.findOne({ where: { id } });
+        if (!article) {
+            throw new NotFoundException(`Article with ID ${id} not found`);
+        }
+        await this.articleRepository.remove(article);
+    }
 }
