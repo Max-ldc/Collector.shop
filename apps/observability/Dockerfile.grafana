@@ -1,5 +1,6 @@
 # Dockerfile pour Grafana avec Dashboard "Pre-Loaded"
 FROM grafana/grafana:latest
+LABEL ci-demo="trigger-grafana-rebuild-20260217"
 
 # --- CORRECTION DU PROBLEME DE REDIRECTION (BOUCLE INFINIE) ---
 # Azure Container Apps termine le SSL avant d'arriver au conteneur.

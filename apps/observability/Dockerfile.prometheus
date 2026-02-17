@@ -1,4 +1,6 @@
+#
 FROM prom/prometheus:latest
+LABEL ci-demo="trigger-prometheus-rebuild-20260217"
 # On écrase la config par défaut pour inclure nos cibles
 COPY prometheus.yml /etc/prometheus/prometheus.yml
 
